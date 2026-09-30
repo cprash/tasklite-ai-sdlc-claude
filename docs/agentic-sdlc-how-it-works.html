@@ -592,7 +592,7 @@ footer {
         <p class="step-desc">Reads the user story, asks targeted clarification questions, identifies ambiguities and risks, then produces formal functional and non-functional requirements. At Step 1.5, classifies the story as <strong style="color:var(--s2)">API</strong>, <strong style="color:var(--s5)">UI</strong>, <strong style="color:var(--s1)">Full-Stack</strong>, or <strong style="color:var(--s3)">Developer Tooling</strong> — this single field gates which checklists, test frameworks, and review areas activate downstream.</p>
         <div class="step-io">
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/user-story.md</span></div>
-          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">requirements.md (incl. Story Type)</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/requirements.md (incl. Story Type)</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">requirements-analyst</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
@@ -608,8 +608,8 @@ footer {
         </div>
         <p class="step-desc">Designs the high-level system architecture: components, data flow, technology choices with rationale, security considerations, and open questions. For UI and Full-Stack stories, adds cross-cutting concerns: accessibility, responsive design, component architecture, client-side state management, bundle size, and browser support.</p>
         <div class="step-io">
-          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">requirements.md (Story Type)</span></div>
-          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">architecture.md + ADRs</span></div>
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/requirements.md (Story Type)</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/architecture.md + ADRs</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">architect</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
@@ -625,8 +625,8 @@ footer {
         </div>
         <p class="step-desc">An independent senior architect reviews the proposed architecture for design risks, missing components, security gaps, failure scenarios, and inconsistencies — before a single line of code is written.</p>
         <div class="step-io">
-          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">architecture.md + requirements.md</span></div>
-          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">design-review.md</span></div>
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/architecture.md + docs/requirements.md</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/design-review.md</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">design-reviewer</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
@@ -643,7 +643,7 @@ footer {
         <p class="step-desc">Converts the approved architecture into a dependency-ordered task list. Each task has a unique ID, related requirement, affected files, acceptance criteria, testing requirements, and status. Blocked tasks are explicitly flagged.</p>
         <div class="step-io">
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">requirements + architecture + design-review</span></div>
-          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">impl-plan.md</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/impl-plan.md</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">implementation-planner</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
@@ -657,9 +657,9 @@ footer {
             <code class="cmd-chip s5">/implement</code>
           </div>
         </div>
-        <p class="step-desc">Works through impl-plan.md in dependency order, one task at a time. Writes source code and tests together. Runs the linter and TypeScript compiler after each file. Stops to ask before any ambiguous architectural decision.</p>
+        <p class="step-desc">Works through docs/impl-plan.md in dependency order, one task at a time. Writes source code and tests together. Runs the linter and TypeScript compiler after each file. Stops to ask before any ambiguous architectural decision.</p>
         <div class="step-io">
-          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">impl-plan.md + CLAUDE.md</span></div>
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/impl-plan.md + CLAUDE.md</span></div>
           <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">src/ + tests/ files</span></div>
           <div class="io-row"><span class="io-lbl">Hook</span><span class="io-val">post-edit.sh runs after each file</span></div>
         </div>
@@ -725,7 +725,7 @@ footer {
     <p class="eyebrow">Adaptive pipeline</p>
     <h2>Story Type Classification</h2>
     <p class="section-intro">
-      The requirements step classifies every story into one of four types. This field is written into requirements.md and read by every downstream agent — it gates which checklists, test frameworks, and review areas activate, ensuring no UI checks run on pure backend work and no frontend gates are missed on UI work.
+      The requirements step classifies every story into one of four types. This field is written into docs/requirements.md and read by every downstream agent — it gates which checklists, test frameworks, and review areas activate, ensuring no UI checks run on pure backend work and no frontend gates are missed on UI work.
     </p>
 
     <div class="story-grid">
@@ -812,7 +812,7 @@ footer {
       <div class="block-card">
         <span class="block-icon">🤖</span>
         <h3>Agents <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 7 total</span></h3>
-        <p>Specialised Claude subagents with defined personas, step-by-step processes, and strict operating rules. Each agent reads the Story Type from requirements.md and activates the appropriate checklists — UI-specific areas are skipped entirely for API and Developer Tooling stories.</p>
+        <p>Specialised Claude subagents with defined personas, step-by-step processes, and strict operating rules. Each agent reads the Story Type from docs/requirements.md and activates the appropriate checklists — UI-specific areas are skipped entirely for API and Developer Tooling stories.</p>
         <div class="tag-row">
           <span class="tag">requirements-analyst</span>
           <span class="tag">architect</span>
@@ -881,13 +881,13 @@ footer {
       <div class="block-card">
         <span class="block-icon">📄</span>
         <h3>SDLC Artifacts <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 6 core</span></h3>
-        <p>The documents each step produces and the next step consumes. Once approved by the human, each artifact becomes the authoritative source of truth for everything downstream. requirements.md is the most critical — its Story Type field controls the entire pipeline's behaviour.</p>
+        <p>The documents each step produces and the next step consumes. Once approved by the human, each artifact becomes the authoritative source of truth for everything downstream. docs/requirements.md is the most critical — its Story Type field controls the entire pipeline's behaviour.</p>
         <div class="tag-row">
           <span class="tag">CLAUDE.md</span>
-          <span class="tag">requirements.md</span>
-          <span class="tag">architecture.md</span>
-          <span class="tag">design-review.md</span>
-          <span class="tag">impl-plan.md</span>
+          <span class="tag">docs/requirements.md</span>
+          <span class="tag">docs/architecture.md</span>
+          <span class="tag">docs/design-review.md</span>
+          <span class="tag">docs/impl-plan.md</span>
           <span class="tag">CHANGELOG.md</span>
         </div>
       </div>
@@ -899,7 +899,7 @@ footer {
   <section>
     <p class="eyebrow">Flow</p>
     <h2>How the Components Connect</h2>
-    <p class="section-intro">A single slash command sets off a chain: the command loads an agent and a skill, Claude reads the relevant documents, produces output, and waits for a human decision before proceeding. The Story Type written into requirements.md propagates through every subsequent step.</p>
+    <p class="section-intro">A single slash command sets off a chain: the command loads an agent and a skill, Claude reads the relevant documents, produces output, and waits for a human decision before proceeding. The Story Type written into docs/requirements.md propagates through every subsequent step.</p>
 
     <div class="diagram-wrap">
       <pre class="mermaid">
@@ -913,7 +913,7 @@ flowchart LR
     CL -->|"reads"| US["docs/user-story.md"]
     CL -->|"asks questions\n+ classifies Story Type"| H
     H -->|"answers"| CL
-    CL -->|"writes draft\n(incl. Story Type field)"| REQ["requirements.md"]
+    CL -->|"writes draft\n(incl. Story Type field)"| REQ["docs/requirements.md"]
     REQ --> GH{"👤 Human\nReview"}
     GH -->|"approved ✓"| NEXT["/architecture\n(reads Story Type)"]
     GH -->|"changes needed"| CL
@@ -981,7 +981,7 @@ flowchart LR
         <div class="rule-icon" style="background:rgba(110,231,183,.12);color:var(--s7);">🏗️</div>
         <div>
           <h3>Preserve architecture</h3>
-          <p>The approved architecture.md is not modified during implementation without a human-reviewed design change. Scope creep is caught and surfaced, not absorbed silently.</p>
+          <p>The approved docs/architecture.md is not modified during implementation without a human-reviewed design change. Scope creep is caught and surfaced, not absorbed silently.</p>
         </div>
       </div>
 
@@ -989,7 +989,7 @@ flowchart LR
         <div class="rule-icon" style="background:rgba(252,211,77,.12);color:var(--s8);">📋</div>
         <div>
           <h3>One task at a time</h3>
-          <p>During /implement, Claude works on exactly one TASK from impl-plan.md at a time, runs tests after each, and updates the task status before moving to the next.</p>
+          <p>During /implement, Claude works on exactly one TASK from docs/impl-plan.md at a time, runs tests after each, and updates the task status before moving to the next.</p>
         </div>
       </div>
 
@@ -997,7 +997,7 @@ flowchart LR
         <div class="rule-icon" style="background:rgba(52,211,153,.12);color:var(--s3);">🎛️</div>
         <div>
           <h3>Conditional activation</h3>
-          <p>Agents read Story Type from requirements.md before running any checklist. UI-specific areas (Area 11, Vitest/Playwright, WCAG NFRs, Section 8a security) activate only for UI and Full-Stack stories — never for API-only or Developer Tooling work.</p>
+          <p>Agents read Story Type from docs/requirements.md before running any checklist. UI-specific areas (Area 11, Vitest/Playwright, WCAG NFRs, Section 8a security) activate only for UI and Full-Stack stories — never for API-only or Developer Tooling work.</p>
         </div>
       </div>
 
@@ -1026,34 +1026,34 @@ flowchart LR
             <td class="cmd-col">/requirements</td>
             <td class="agent-col">requirements-analyst</td>
             <td class="mono-sm">docs/user-story.md</td>
-            <td class="mono-sm">requirements.md (+ Story Type)</td>
+            <td class="mono-sm">docs/requirements.md (+ Story Type)</td>
             <td class="gate-y">Required</td>
           </tr>
           <tr>
             <td class="cmd-col">/architecture</td>
             <td class="agent-col">architect</td>
-            <td class="mono-sm">requirements.md (Story Type)</td>
-            <td class="mono-sm">architecture.md + ADRs</td>
+            <td class="mono-sm">docs/requirements.md (Story Type)</td>
+            <td class="mono-sm">docs/architecture.md + ADRs</td>
             <td class="gate-y">Required</td>
           </tr>
           <tr>
             <td class="cmd-col">/design-review</td>
             <td class="agent-col">design-reviewer</td>
-            <td class="mono-sm">architecture.md + requirements.md</td>
-            <td class="mono-sm">design-review.md</td>
+            <td class="mono-sm">docs/architecture.md + docs/requirements.md</td>
+            <td class="mono-sm">docs/design-review.md</td>
             <td class="gate-y">Required</td>
           </tr>
           <tr>
             <td class="cmd-col">/plan</td>
             <td class="agent-col">implementation-planner</td>
             <td class="mono-sm">requirements + architecture + design-review</td>
-            <td class="mono-sm">impl-plan.md</td>
+            <td class="mono-sm">docs/impl-plan.md</td>
             <td class="gate-y">Required</td>
           </tr>
           <tr>
             <td class="cmd-col">/implement</td>
             <td class="agent-col">—</td>
-            <td class="mono-sm">impl-plan.md + CLAUDE.md</td>
+            <td class="mono-sm">docs/impl-plan.md + CLAUDE.md</td>
             <td class="mono-sm">src/ + tests/ files</td>
             <td class="gate-y">Per commit</td>
           </tr>
