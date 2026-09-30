@@ -1,0 +1,153 @@
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  text-align: left;
+
+  @media (max-width: 1024px) {
+    padding: 20px 16px 48px;
+  }
+}
+
+.task-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-h);
+    margin-bottom: 6px;
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-h);
+  }
+
+  input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  & > div:first-child {
+    flex: 1 1 240px;
+  }
+
+  button {
+    font: inherit;
+    padding: 9px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--accent-border);
+    background: var(--accent-bg);
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  button:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.app__message {
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.app__message--success {
+  color: #1a7f37;
+  background: rgba(26, 127, 55, 0.1);
+}
+
+.app__message--error {
+  color: #cf222e;
+  background: rgba(207, 34, 46, 0.1);
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.task-item__title {
+  flex: 1 1 auto;
+  color: var(--text-h);
+}
+
+.task-item--completed .task-item__title {
+  text-decoration: line-through;
+  color: var(--text);
+}
+
+.task-item__badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.task-item__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.task-item__actions button {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.task-item__actions button:hover:not(:disabled) {
+  border-color: var(--accent-border);
+}
+
+.task-item__actions button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.task-item__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

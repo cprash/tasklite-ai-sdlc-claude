@@ -1,0 +1,13 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/dist
+
+# SQLite local dev database
+/prisma/dev.db
+*.db-journal
+
+# Test coverage and TypeScript incremental build cache
+coverage/
+*.tsbuildinfo
