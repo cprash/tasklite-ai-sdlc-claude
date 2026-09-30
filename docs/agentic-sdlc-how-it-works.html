@@ -594,6 +594,7 @@ footer {
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/user-story.md</span></div>
           <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/requirements.md (incl. Story Type)</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">requirements-analyst</span></div>
+          <div class="io-row"><span class="io-lbl">Skill</span><span class="io-val">requirements-analysis</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
       </div>
@@ -611,6 +612,7 @@ footer {
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/requirements.md (Story Type)</span></div>
           <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/architecture.md + ADRs</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">architect</span></div>
+          <div class="io-row"><span class="io-lbl">Skill</span><span class="io-val">architecture-design</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
       </div>
@@ -628,6 +630,7 @@ footer {
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/architecture.md + docs/requirements.md</span></div>
           <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/design-review.md</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">design-reviewer</span></div>
+          <div class="io-row"><span class="io-lbl">Skill</span><span class="io-val">—</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
       </div>
@@ -645,6 +648,7 @@ footer {
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">requirements + architecture + design-review</span></div>
           <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">docs/impl-plan.md</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">implementation-planner</span></div>
+          <div class="io-row"><span class="io-lbl">Skill</span><span class="io-val">—</span></div>
         </div>
         <div class="gate-badge">🔐 Human approval required</div>
       </div>
@@ -679,6 +683,7 @@ footer {
           <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">git diff + SDLC docs + Story Type</span></div>
           <div class="io-row"><span class="io-lbl">Produces</span><span class="io-val">Findings report (file:line + severity)</span></div>
           <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">code-reviewer</span></div>
+          <div class="io-row"><span class="io-lbl">Skill</span><span class="io-val">code-review</span></div>
         </div>
         <div class="gate-badge">🔐 Human decides what to fix</div>
       </div>
@@ -695,6 +700,7 @@ footer {
         <div class="step-io">
           <div class="io-row"><span class="io-lbl">Runs</span><span class="io-val">Jest · Vitest · Playwright · tsc · ESLint · audit</span></div>
           <div class="io-row"><span class="io-lbl">Agents</span><span class="io-val">test-engineer + documentation-reviewer</span></div>
+          <div class="io-row"><span class="io-lbl">Skills</span><span class="io-val">testing + documentation-sync</span></div>
           <div class="io-row"><span class="io-lbl">Produces</span><span class="io-val">Verification report</span></div>
         </div>
         <div class="gate-badge">🔐 Human reviews before PR</div>
@@ -812,16 +818,22 @@ footer {
       <div class="block-card">
         <span class="block-icon">🤖</span>
         <h3>Agents <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 7 total</span></h3>
-        <p>Specialised Claude subagents with defined personas, step-by-step processes, and strict operating rules. Each agent reads the Story Type from docs/requirements.md and activates the appropriate checklists — UI-specific areas are skipped entirely for API and Developer Tooling stories.</p>
-        <div class="tag-row">
-          <span class="tag">requirements-analyst</span>
-          <span class="tag">architect</span>
-          <span class="tag">design-reviewer</span>
-          <span class="tag">implementation-planner</span>
-          <span class="tag">code-reviewer</span>
-          <span class="tag">test-engineer</span>
-          <span class="tag">documentation-reviewer</span>
-        </div>
+        <p>Specialised Claude subagents with defined personas, step-by-step processes, and strict operating rules. Each reads the Story Type from docs/requirements.md and activates the appropriate checklists.</p>
+        <table style="width:100%;font-size:.8rem;border-collapse:collapse;margin-top:10px;">
+          <thead><tr style="border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:4px 8px 4px 0;color:var(--muted);font-weight:500;">Agent</th>
+            <th style="text-align:left;padding:4px 0;color:var(--muted);font-weight:500;">Skill loaded</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">requirements-analyst</td><td style="padding:4px 0;color:var(--muted);">requirements-analysis</td></tr>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">architect</td><td style="padding:4px 0;color:var(--muted);">architecture-design</td></tr>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">design-reviewer</td><td style="padding:4px 0;color:var(--muted);">—</td></tr>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">implementation-planner</td><td style="padding:4px 0;color:var(--muted);">—</td></tr>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">code-reviewer</td><td style="padding:4px 0;color:var(--muted);">code-review</td></tr>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">test-engineer</td><td style="padding:4px 0;color:var(--muted);">testing</td></tr>
+            <tr><td style="padding:4px 8px 4px 0;font-family:var(--fn-mono);color:var(--accent);">documentation-reviewer</td><td style="padding:4px 0;color:var(--muted);">documentation-sync</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="block-card">
@@ -1016,6 +1028,7 @@ flowchart LR
           <tr>
             <th>Command</th>
             <th>Agent</th>
+            <th>Skill</th>
             <th>Reads</th>
             <th>Produces</th>
             <th>Approval</th>
@@ -1025,6 +1038,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/requirements</td>
             <td class="agent-col">requirements-analyst</td>
+            <td class="mono-sm">requirements-analysis</td>
             <td class="mono-sm">docs/user-story.md</td>
             <td class="mono-sm">docs/requirements.md (+ Story Type)</td>
             <td class="gate-y">Required</td>
@@ -1032,6 +1046,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/architecture</td>
             <td class="agent-col">architect</td>
+            <td class="mono-sm">architecture-design</td>
             <td class="mono-sm">docs/requirements.md (Story Type)</td>
             <td class="mono-sm">docs/architecture.md + ADRs</td>
             <td class="gate-y">Required</td>
@@ -1039,6 +1054,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/design-review</td>
             <td class="agent-col">design-reviewer</td>
+            <td class="mono-sm">—</td>
             <td class="mono-sm">docs/architecture.md + docs/requirements.md</td>
             <td class="mono-sm">docs/design-review.md</td>
             <td class="gate-y">Required</td>
@@ -1046,6 +1062,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/plan</td>
             <td class="agent-col">implementation-planner</td>
+            <td class="mono-sm">—</td>
             <td class="mono-sm">requirements + architecture + design-review</td>
             <td class="mono-sm">docs/impl-plan.md</td>
             <td class="gate-y">Required</td>
@@ -1053,6 +1070,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/implement</td>
             <td class="agent-col">—</td>
+            <td class="mono-sm">—</td>
             <td class="mono-sm">docs/impl-plan.md + CLAUDE.md</td>
             <td class="mono-sm">src/ + tests/ files</td>
             <td class="gate-y">Per commit</td>
@@ -1060,6 +1078,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/review</td>
             <td class="agent-col">code-reviewer</td>
+            <td class="mono-sm">code-review</td>
             <td class="mono-sm">git diff + Story Type</td>
             <td class="mono-sm">Findings report (10 or 11 areas)</td>
             <td class="gate-y">Human decides</td>
@@ -1067,6 +1086,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/verify</td>
             <td class="agent-col">test-engineer + doc-reviewer</td>
+            <td class="mono-sm">testing + documentation-sync</td>
             <td class="mono-sm">Source + docs + Story Type</td>
             <td class="mono-sm">Verification report (backend + UI if applicable)</td>
             <td class="gate-y">Human reviews</td>
@@ -1074,6 +1094,7 @@ flowchart LR
           <tr>
             <td class="cmd-col">/prepare-pr</td>
             <td class="agent-col">—</td>
+            <td class="mono-sm">—</td>
             <td class="mono-sm">All artifacts + git diff</td>
             <td class="mono-sm">Staged commit + PR description</td>
             <td class="gate-y">Before push</td>
