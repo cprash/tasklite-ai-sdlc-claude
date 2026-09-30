@@ -11,6 +11,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [busyTaskId, setBusyTaskId] = useState<number | null>(null);
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -58,6 +59,14 @@ function App() {
     }
   }
 
+  function handleStartEdit(task: Task) {
+    setEditingTaskId(task.id);
+  }
+
+  function handleCancelEdit() {
+    setEditingTaskId(null);
+  }
+
   async function handleDelete(task: Task) {
     setError(null);
     setStatusMessage(null);
@@ -95,7 +104,10 @@ function App() {
         loading={loading}
         onToggleStatus={handleToggleStatus}
         onDelete={handleDelete}
+        onStartEdit={handleStartEdit}
+        onCancelEdit={handleCancelEdit}
         busyTaskId={busyTaskId}
+        editingTaskId={editingTaskId}
       />
     </main>
   );

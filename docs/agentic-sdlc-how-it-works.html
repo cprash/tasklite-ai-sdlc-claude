@@ -1,0 +1,1091 @@
+﻿<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TaskLite Agentic SDLC</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ============================================
+   TOKENS - dark-first
+   ============================================ */
+:root {
+  color-scheme: dark;
+  --bg:         #090e18;
+  --surface:    #0e1623;
+  --surface-2:  #141e2d;
+  --border:     #1c2d40;
+  --border-hi:  #283e57;
+  --text:       #d8e4f0;
+  --muted:      #6b8ba6;
+  --faint:      #1d2d40;
+  --accent:     #4c9ffe;
+  --accent-dim: rgba(76,159,254,.1);
+
+  --green:  #39d98e;
+  --amber:  #f4a823;
+  --red:    #ff5252;
+
+  /* Step palette — 8 distinct hues */
+  --s1: #9f7aea;  /* violet   */
+  --s2: #4c9ffe;  /* blue     */
+  --s3: #34d399;  /* teal     */
+  --s4: #f59e0b;  /* amber    */
+  --s5: #ec4899;  /* pink     */
+  --s6: #a78bfa;  /* lavender */
+  --s7: #6ee7b7;  /* mint     */
+  --s8: #fcd34d;  /* yellow   */
+
+  --r:    8px;
+  --r-lg: 14px;
+  --fn-ui:   'Outfit', system-ui, sans-serif;
+  --fn-body: 'DM Sans', system-ui, sans-serif;
+  --fn-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg:         #f2f6fb;
+    --surface:    #ffffff;
+    --surface-2:  #eaeff7;
+    --border:     #cdd9e8;
+    --border-hi:  #afc5d8;
+    --text:       #0b1929;
+    --muted:      #3d5e7c;
+    --faint:      #c4d4e3;
+    --accent:     #1570e0;
+    --accent-dim: rgba(21,112,224,.08);
+    --green:  #059669;
+    --amber:  #b45309;
+    --red:    #dc2626;
+    --s1: #6d28d9; --s2: #1570e0; --s3: #059669;
+    --s4: #b45309; --s5: #be185d; --s6: #7c3aed;
+    --s7: #047857; --s8: #92400e;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f2f6fb; --surface: #ffffff; --surface-2: #eaeff7;
+  --border: #cdd9e8; --border-hi: #afc5d8;
+  --text: #0b1929; --muted: #3d5e7c; --faint: #c4d4e3;
+  --accent: #1570e0; --accent-dim: rgba(21,112,224,.08);
+  --green: #059669; --amber: #b45309; --red: #dc2626;
+  --s1: #6d28d9; --s2: #1570e0; --s3: #059669;
+  --s4: #b45309; --s5: #be185d; --s6: #7c3aed;
+  --s7: #047857; --s8: #92400e;
+}
+
+/* ============================================
+   RESET & BASE
+============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+img { max-width: 100%; }
+
+body {
+  font-family: var(--fn-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.7;
+  padding-inline: 20px;
+}
+
+/* ============================================
+   LAYOUT
+============================================ */
+.page {
+  max-width: 980px;
+  margin-inline: auto;
+}
+section {
+  padding-block: 60px;
+  border-bottom: 1px solid var(--border);
+}
+section:last-of-type { border-bottom: none; }
+
+/* ============================================
+   TYPOGRAPHY
+============================================ */
+h1, h2, h3 { font-family: var(--fn-ui); line-height: 1.2; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; }
+h2 { font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 600; }
+p  { max-width: 68ch; }
+
+.eyebrow {
+  font-family: var(--fn-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section-intro {
+  color: var(--muted);
+  margin-block: 8px 36px;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   HERO
+============================================ */
+.hero {
+  padding-block: 72px 56px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--faint) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.hero > * { position: relative; }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(76,159,254,.28);
+  color: var(--accent);
+  font-family: var(--fn-mono);
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+.hero-badge .dot {
+  width: 5px; height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hero h1 { margin-bottom: 18px; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+
+.hero-sub {
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 58ch;
+  margin-bottom: 32px;
+}
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-family: var(--fn-mono);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.stat-chip b { color: var(--text); font-weight: 500; }
+
+/* ============================================
+   STEP CARDS
+============================================ */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+}
+
+.step-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: border-color .2s;
+}
+.step-card:hover { border-color: var(--border-hi); }
+
+.step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* step number badge — colored background, colored text via token */
+.sn {
+  width: 30px; height: 30px;
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fn-ui);
+  font-size: 0.85rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.sn.s1 { background: rgba(159,122,234,.15); color: var(--s1); }
+.sn.s2 { background: rgba(76,159,254,.15);  color: var(--s2); }
+.sn.s3 { background: rgba(52,211,153,.15);  color: var(--s3); }
+.sn.s4 { background: rgba(245,158,11,.15);  color: var(--s4); }
+.sn.s5 { background: rgba(236,72,153,.15);  color: var(--s5); }
+.sn.s6 { background: rgba(167,139,250,.15); color: var(--s6); }
+.sn.s7 { background: rgba(110,231,183,.15); color: var(--s7); }
+.sn.s8 { background: rgba(252,211,77,.15);  color: var(--s8); }
+
+.step-name { font-family: var(--fn-ui); font-weight: 600; font-size: 0.95rem; }
+
+.cmd-chip {
+  display: inline-block;
+  font-family: var(--fn-mono);
+  font-size: 0.72rem;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  margin-top: 3px;
+}
+.cmd-chip.s1 { color: var(--s1); } .cmd-chip.s2 { color: var(--s2); }
+.cmd-chip.s3 { color: var(--s3); } .cmd-chip.s4 { color: var(--s4); }
+.cmd-chip.s5 { color: var(--s5); } .cmd-chip.s6 { color: var(--s6); }
+.cmd-chip.s7 { color: var(--s7); } .cmd-chip.s8 { color: var(--s8); }
+
+.step-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.step-io {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.io-row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 0.75rem;
+  font-family: var(--fn-mono);
+}
+.io-lbl {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  width: 38px;
+  flex-shrink: 0;
+  opacity: .7;
+}
+.io-val { color: var(--text); }
+
+.gate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--fn-mono);
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(244,168,35,.1);
+  color: var(--amber);
+  border: 1px solid rgba(244,168,35,.22);
+  margin-top: 10px;
+  width: fit-content;
+}
+
+/* ============================================
+   STORY TYPE CLASSIFICATION
+============================================ */
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.story-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.story-card:hover { border-color: var(--border-hi); }
+
+.story-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.story-badge {
+  display: inline-block;
+  font-family: var(--fn-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 4px;
+  margin-bottom: 7px;
+  letter-spacing: 0.03em;
+}
+.story-badge.api   { background: rgba(76,159,254,.15);  color: var(--s2); border: 1px solid rgba(76,159,254,.25); }
+.story-badge.ui    { background: rgba(236,72,153,.15);  color: var(--s5); border: 1px solid rgba(236,72,153,.25); }
+.story-badge.fs    { background: rgba(159,122,234,.15); color: var(--s1); border: 1px solid rgba(159,122,234,.25); }
+.story-badge.dt    { background: rgba(52,211,153,.15);  color: var(--s3); border: 1px solid rgba(52,211,153,.25); }
+
+.story-head p {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: none;
+}
+
+.story-caps {
+  padding: 12px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cap-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.cap-on {
+  font-family: var(--fn-mono);
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(57,217,142,.1);
+  color: var(--green);
+  border: 1px solid rgba(57,217,142,.2);
+  white-space: nowrap;
+}
+.cap-off {
+  font-family: var(--fn-mono);
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  opacity: .5;
+  white-space: nowrap;
+}
+
+.story-card-title {
+  font-family: var(--fn-ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+/* ============================================
+   BUILDING BLOCKS
+============================================ */
+.blocks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px;
+}
+
+.block-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+}
+.block-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 10px;
+}
+.block-card h3 { margin-bottom: 5px; }
+.block-card > p { font-size: 0.855rem; color: var(--muted); margin-bottom: 14px; line-height: 1.55; }
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-family: var(--fn-mono);
+  font-size: 0.69rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* ============================================
+   FLOW DIAGRAM
+============================================ */
+.diagram-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px 20px;
+  overflow-x: auto;
+}
+
+/* ============================================
+   RULES
+============================================ */
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.rule-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+}
+.rule-icon {
+  width: 34px; height: 34px;
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.rule-card h3 { font-size: 0.9rem; margin-bottom: 2px; }
+.rule-card p  { font-size: 0.81rem; color: var(--muted); line-height: 1.5; max-width: none; }
+
+/* ============================================
+   REFERENCE TABLE
+============================================ */
+.ref-scroll { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.855rem;
+}
+thead th {
+  text-align: left;
+  padding: 8px 14px;
+  font-family: var(--fn-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface-2); }
+.cmd-col { font-family: var(--fn-mono); font-size: 0.8rem; color: var(--accent); white-space: nowrap; }
+.agent-col { color: var(--muted); font-size: 0.82rem; }
+.mono-sm { font-family: var(--fn-mono); font-size: 0.76rem; color: var(--muted); }
+.gate-y { color: var(--amber); font-size: 0.8rem; font-family: var(--fn-mono); }
+.gate-n { color: var(--green);  font-size: 0.8rem; font-family: var(--fn-mono); }
+
+/* ============================================
+   FOOTER
+============================================ */
+footer {
+  padding-block: 32px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-family: var(--fn-mono);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  opacity: .7;
+}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 620px) {
+  .steps-grid, .blocks-grid, .rules-grid, .story-grid { grid-template-columns: 1fr; }
+  section { padding-block: 44px; }
+  .hero   { padding-block: 48px 40px; }
+  h1 { font-size: 1.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-card, .story-card { transition: none; }
+}
+</style>
+
+<div class="page">
+
+  <!-- ── HERO ─────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-badge"><span class="dot"></span>TaskLite · Capstone Project</div>
+    <h1>Agentic <em>SDLC</em><br>for TaskLite</h1>
+    <p class="hero-sub">
+      An 8-step, Claude-driven software delivery pipeline — from user story to pull request.
+      Every step is AI-assisted with a dedicated agent, skill, and slash command.
+      Story Type classification adapts the pipeline to API, UI, Full-Stack, or Developer Tooling work.
+      Every commit, push, and PR requires explicit human approval.
+    </p>
+    <div class="stats-row">
+      <span class="stat-chip"><b>8</b> pipeline steps</span>
+      <span class="stat-chip"><b>7</b> agents</span>
+      <span class="stat-chip"><b>6</b> skills</span>
+      <span class="stat-chip"><b>8</b> slash commands</span>
+      <span class="stat-chip"><b>4</b> story types</span>
+      <span class="stat-chip"><b>5</b> prompts</span>
+      <span class="stat-chip"><b>3</b> hooks</span>
+    </div>
+  </section>
+
+  <!-- ── THE 8 STEPS ──────────────────────────── -->
+  <section>
+    <p class="eyebrow">The pipeline</p>
+    <h2>8-Step SDLC Workflow</h2>
+    <p class="section-intro">
+      Each step is triggered by a slash command. Claude reads the previous step's output, applies its agent persona and skill instructions, and produces the next document or set of files.
+      Human approval gates prevent progress until a human explicitly signs off.
+    </p>
+
+    <div class="steps-grid">
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s1">1</div>
+          <div>
+            <div class="step-name">Requirements</div>
+            <code class="cmd-chip s1">/requirements</code>
+          </div>
+        </div>
+        <p class="step-desc">Reads the user story, asks targeted clarification questions, identifies ambiguities and risks, then produces formal functional and non-functional requirements. At Step 1.5, classifies the story as <strong style="color:var(--s2)">API</strong>, <strong style="color:var(--s5)">UI</strong>, <strong style="color:var(--s1)">Full-Stack</strong>, or <strong style="color:var(--s3)">Developer Tooling</strong> — this single field gates which checklists, test frameworks, and review areas activate downstream.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">docs/user-story.md</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">requirements.md (incl. Story Type)</span></div>
+          <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">requirements-analyst</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human approval required</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s2">2</div>
+          <div>
+            <div class="step-name">Architecture</div>
+            <code class="cmd-chip s2">/architecture</code>
+          </div>
+        </div>
+        <p class="step-desc">Designs the high-level system architecture: components, data flow, technology choices with rationale, security considerations, and open questions. For UI and Full-Stack stories, adds cross-cutting concerns: accessibility, responsive design, component architecture, client-side state management, bundle size, and browser support.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">requirements.md (Story Type)</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">architecture.md + ADRs</span></div>
+          <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">architect</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human approval required</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s3">3</div>
+          <div>
+            <div class="step-name">Design Review</div>
+            <code class="cmd-chip s3">/design-review</code>
+          </div>
+        </div>
+        <p class="step-desc">An independent senior architect reviews the proposed architecture for design risks, missing components, security gaps, failure scenarios, and inconsistencies — before a single line of code is written.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">architecture.md + requirements.md</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">design-review.md</span></div>
+          <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">design-reviewer</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human approval required</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s4">4</div>
+          <div>
+            <div class="step-name">Implementation Plan</div>
+            <code class="cmd-chip s4">/plan</code>
+          </div>
+        </div>
+        <p class="step-desc">Converts the approved architecture into a dependency-ordered task list. Each task has a unique ID, related requirement, affected files, acceptance criteria, testing requirements, and status. Blocked tasks are explicitly flagged.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">requirements + architecture + design-review</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">impl-plan.md</span></div>
+          <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">implementation-planner</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human approval required</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s5">5</div>
+          <div>
+            <div class="step-name">Implementation</div>
+            <code class="cmd-chip s5">/implement</code>
+          </div>
+        </div>
+        <p class="step-desc">Works through impl-plan.md in dependency order, one task at a time. Writes source code and tests together. Runs the linter and TypeScript compiler after each file. Stops to ask before any ambiguous architectural decision.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">impl-plan.md + CLAUDE.md</span></div>
+          <div class="io-row"><span class="io-lbl">Writes</span><span class="io-val">src/ + tests/ files</span></div>
+          <div class="io-row"><span class="io-lbl">Hook</span><span class="io-val">post-edit.sh runs after each file</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human reviews diff before each commit</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s6">6</div>
+          <div>
+            <div class="step-name">Code Review</div>
+            <code class="cmd-chip s6">/review</code>
+          </div>
+        </div>
+        <p class="step-desc">An independent peer reviewer checks changed files across 10 core areas: correctness, security, error handling, test coverage, code clarity, DRY principle, dependency safety, performance, maintainability, and observability. <strong style="color:var(--s5)">Area 11</strong> (accessibility, React patterns, responsive layout) activates automatically for UI and Full-Stack stories.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">git diff + SDLC docs + Story Type</span></div>
+          <div class="io-row"><span class="io-lbl">Produces</span><span class="io-val">Findings report (file:line + severity)</span></div>
+          <div class="io-row"><span class="io-lbl">Agent</span><span class="io-val">code-reviewer</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human decides what to fix</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s7">7</div>
+          <div>
+            <div class="step-name">Verification</div>
+            <code class="cmd-chip s7">/verify</code>
+          </div>
+        </div>
+        <p class="step-desc">Runs the full verification suite. Backend: Jest unit + integration tests, TypeScript compilation, ESLint, npm audit, secrets scan, docs review. UI and Full-Stack: also runs <strong style="color:var(--s5)">Vitest + React Testing Library</strong> component tests and <strong style="color:var(--s5)">Playwright</strong> E2E tests. Reports every command run, result, and coverage figure. Never claims pass if not executed.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Runs</span><span class="io-val">Jest · Vitest · Playwright · tsc · ESLint · audit</span></div>
+          <div class="io-row"><span class="io-lbl">Agents</span><span class="io-val">test-engineer + documentation-reviewer</span></div>
+          <div class="io-row"><span class="io-lbl">Produces</span><span class="io-val">Verification report</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human reviews before PR</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-head">
+          <div class="sn s8">8</div>
+          <div>
+            <div class="step-name">Pull Request</div>
+            <code class="cmd-chip s8">/prepare-pr</code>
+          </div>
+        </div>
+        <p class="step-desc">Stages the changed files, generates a CHANGELOG entry, drafts the commit message, and produces a complete PR description — summary, changes, test evidence, security review, known limitations, and reviewer checklist.</p>
+        <div class="step-io">
+          <div class="io-row"><span class="io-lbl">Reads</span><span class="io-val">All SDLC artifacts + git diff</span></div>
+          <div class="io-row"><span class="io-lbl">Produces</span><span class="io-val">Staged commit + PR description</span></div>
+          <div class="io-row"><span class="io-lbl">Hook</span><span class="io-val">pre-push.sh runs before git push</span></div>
+        </div>
+        <div class="gate-badge">🔐 Human approves before git push + gh pr create</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── STORY TYPE CLASSIFICATION ────────────── -->
+  <section>
+    <p class="eyebrow">Adaptive pipeline</p>
+    <h2>Story Type Classification</h2>
+    <p class="section-intro">
+      The requirements step classifies every story into one of four types. This field is written into requirements.md and read by every downstream agent — it gates which checklists, test frameworks, and review areas activate, ensuring no UI checks run on pure backend work and no frontend gates are missed on UI work.
+    </p>
+
+    <div class="story-grid">
+
+      <div class="story-card">
+        <div class="story-head">
+          <div class="story-badge api">API</div>
+          <div class="story-card-title">Backend / API</div>
+          <p>A story that affects only backend logic, database models, or REST endpoints — no browser-facing UI changes.</p>
+        </div>
+        <div class="story-caps">
+          <div class="cap-row"><span class="cap-label">Jest unit + integration</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Backend security review</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Prisma / SQL checks</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Vitest + RTL</span><span class="cap-off">n/a</span></div>
+          <div class="cap-row"><span class="cap-label">Playwright E2E</span><span class="cap-off">n/a</span></div>
+          <div class="cap-row"><span class="cap-label">Area 11 UI review</span><span class="cap-off">n/a</span></div>
+          <div class="cap-row"><span class="cap-label">Section 8a frontend security</span><span class="cap-off">n/a</span></div>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-head">
+          <div class="story-badge ui">UI</div>
+          <div class="story-card-title">Frontend / UI</div>
+          <p>A story that delivers browser-facing React components, pages, or user interactions — may call existing APIs but does not change them.</p>
+        </div>
+        <div class="story-caps">
+          <div class="cap-row"><span class="cap-label">Vitest + RTL</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Playwright E2E</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Area 11 UI review</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Section 8a frontend security</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">WCAG 2.1 AA NFRs</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Core Web Vitals NFRs</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Jest backend unit</span><span class="cap-off">n/a</span></div>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-head">
+          <div class="story-badge fs">Full-Stack</div>
+          <div class="story-card-title">Full-Stack</div>
+          <p>A story that changes both the backend API and the frontend UI — all checklists from both API and UI story types are active.</p>
+        </div>
+        <div class="story-caps">
+          <div class="cap-row"><span class="cap-label">Jest unit + integration</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Vitest + RTL</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Playwright E2E</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Area 11 UI review</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Section 8a frontend security</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">WCAG 2.1 AA + Web Vitals</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Backend security review</span><span class="cap-on">active</span></div>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <div class="story-head">
+          <div class="story-badge dt">Developer Tooling</div>
+          <div class="story-card-title">Developer Tooling</div>
+          <p>A CLI tool, build script, code generator, or internal automation — runs in a developer's terminal, not in a browser or as an API server.</p>
+        </div>
+        <div class="story-caps">
+          <div class="cap-row"><span class="cap-label">Jest unit + integration</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Backend security review</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Path traversal checks</span><span class="cap-on">active</span></div>
+          <div class="cap-row"><span class="cap-label">Vitest + RTL</span><span class="cap-off">n/a</span></div>
+          <div class="cap-row"><span class="cap-label">Playwright E2E</span><span class="cap-off">n/a</span></div>
+          <div class="cap-row"><span class="cap-label">Area 11 UI review</span><span class="cap-off">n/a</span></div>
+          <div class="cap-row"><span class="cap-label">WCAG / Web Vitals NFRs</span><span class="cap-off">n/a</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── BUILDING BLOCKS ────────────────────── -->
+  <section>
+    <p class="eyebrow">Architecture</p>
+    <h2>Building Blocks</h2>
+    <p class="section-intro">Five types of components work together. Commands orchestrate agents; agents load skills and prompts; hooks enforce quality at Git lifecycle events. Story Type flows through every layer — each component reads it and activates or skips the appropriate sections.</p>
+
+    <div class="blocks-grid">
+
+      <div class="block-card">
+        <span class="block-icon">🤖</span>
+        <h3>Agents <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 7 total</span></h3>
+        <p>Specialised Claude subagents with defined personas, step-by-step processes, and strict operating rules. Each agent reads the Story Type from requirements.md and activates the appropriate checklists — UI-specific areas are skipped entirely for API and Developer Tooling stories.</p>
+        <div class="tag-row">
+          <span class="tag">requirements-analyst</span>
+          <span class="tag">architect</span>
+          <span class="tag">design-reviewer</span>
+          <span class="tag">implementation-planner</span>
+          <span class="tag">code-reviewer</span>
+          <span class="tag">test-engineer</span>
+          <span class="tag">documentation-reviewer</span>
+        </div>
+      </div>
+
+      <div class="block-card">
+        <span class="block-icon">📚</span>
+        <h3>Skills <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 6 total</span></h3>
+        <p>Reusable instruction sets Claude loads before a specific type of work. Skills adapt to Story Type: frontend sections (Area 11 code review, Vitest/RTL/Playwright testing, Section 8a security, WCAG NFRs) activate only when Story Type is UI or Full-Stack.</p>
+        <div class="tag-row">
+          <span class="tag">requirements-analysis</span>
+          <span class="tag">architecture-design</span>
+          <span class="tag">code-review</span>
+          <span class="tag">testing</span>
+          <span class="tag">documentation-sync</span>
+          <span class="tag">security-review</span>
+        </div>
+      </div>
+
+      <div class="block-card">
+        <span class="block-icon">⚡</span>
+        <h3>Commands <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 8 total</span></h3>
+        <p>Slash commands that orchestrate each pipeline step. Each command specifies which agent and skill to load, which documents to read, what to produce, and exactly when to pause for human approval.</p>
+        <div class="tag-row">
+          <span class="tag">/requirements</span>
+          <span class="tag">/architecture</span>
+          <span class="tag">/design-review</span>
+          <span class="tag">/plan</span>
+          <span class="tag">/implement</span>
+          <span class="tag">/review</span>
+          <span class="tag">/verify</span>
+          <span class="tag">/prepare-pr</span>
+        </div>
+      </div>
+
+      <div class="block-card">
+        <span class="block-icon">💬</span>
+        <h3>Prompts <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 5 total</span></h3>
+        <p>System-level prompts that establish each agent's persona, core principles, output rules, and "what to do when uncertain" guidance. Loaded automatically when the corresponding command is invoked.</p>
+        <div class="tag-row">
+          <span class="tag">requirements-prompt</span>
+          <span class="tag">architecture-prompt</span>
+          <span class="tag">review-prompt</span>
+          <span class="tag">verification-prompt</span>
+          <span class="tag">documentation-prompt</span>
+        </div>
+      </div>
+
+      <div class="block-card">
+        <span class="block-icon">🔗</span>
+        <h3>Hooks <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 3 total</span></h3>
+        <p>Shell scripts that fire at Git lifecycle events. They enforce quality gates automatically — no manual step required. A failing hook blocks the commit or push until the underlying issue is resolved.</p>
+        <div class="tag-row">
+          <span class="tag">pre-commit.sh — lint · type-check · secrets</span>
+          <span class="tag">post-edit.sh — auto-lint · doc-validate</span>
+          <span class="tag">pre-push.sh — full tests · quality checks</span>
+        </div>
+      </div>
+
+      <div class="block-card">
+        <span class="block-icon">📄</span>
+        <h3>SDLC Artifacts <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 6 core</span></h3>
+        <p>The documents each step produces and the next step consumes. Once approved by the human, each artifact becomes the authoritative source of truth for everything downstream. requirements.md is the most critical — its Story Type field controls the entire pipeline's behaviour.</p>
+        <div class="tag-row">
+          <span class="tag">CLAUDE.md</span>
+          <span class="tag">requirements.md</span>
+          <span class="tag">architecture.md</span>
+          <span class="tag">design-review.md</span>
+          <span class="tag">impl-plan.md</span>
+          <span class="tag">CHANGELOG.md</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── HOW IT CONNECTS ───────────────────── -->
+  <section>
+    <p class="eyebrow">Flow</p>
+    <h2>How the Components Connect</h2>
+    <p class="section-intro">A single slash command sets off a chain: the command loads an agent and a skill, Claude reads the relevant documents, produces output, and waits for a human decision before proceeding. The Story Type written into requirements.md propagates through every subsequent step.</p>
+
+    <div class="diagram-wrap">
+      <pre class="mermaid">
+flowchart LR
+    H["👤 Human\ntypes /requirements"] --> CMD["Command\n/requirements"]
+    CMD -->|"loads"| AG["Agent\nrequirements-analyst"]
+    CMD -->|"loads"| SK["Skill\nrequirements-analysis"]
+    AG -->|"persona + rules"| CL["Claude"]
+    SK -->|"process + template"| CL
+    CLAUDE_MD["CLAUDE.md\nproject rules"] -->|"always active"| CL
+    CL -->|"reads"| US["docs/user-story.md"]
+    CL -->|"asks questions\n+ classifies Story Type"| H
+    H -->|"answers"| CL
+    CL -->|"writes draft\n(incl. Story Type field)"| REQ["requirements.md"]
+    REQ --> GH{"👤 Human\nReview"}
+    GH -->|"approved ✓"| NEXT["/architecture\n(reads Story Type)"]
+    GH -->|"changes needed"| CL
+      </pre>
+    </div>
+  </section>
+
+  <!-- ── OPERATING RULES ─────────────────────── -->
+  <section>
+    <p class="eyebrow">Non-negotiable</p>
+    <h2>How Claude Operates</h2>
+    <p class="section-intro">These rules are enforced across every agent and every session. They are defined in CLAUDE.md and applied regardless of which command is running.</p>
+
+    <div class="rules-grid">
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(76,159,254,.12);color:var(--s2);">🚫</div>
+        <div>
+          <h3>Never invent</h3>
+          <p>No invented endpoints, credentials, SLA targets, or owner names. Unknown values are always marked "Not Identified" with a reason — never guessed.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(244,168,35,.12);color:var(--amber);">🔐</div>
+        <div>
+          <h3>Human approval gates</h3>
+          <p>Every git commit, push, and PR creation requires explicit human approval. Claude stages the diff and waits — it never auto-commits.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(57,217,142,.12);color:var(--green);">🔒</div>
+        <div>
+          <h3>No secrets in output</h3>
+          <p>Passwords, tokens, API keys, and connection strings never appear in generated docs, PR descriptions, or logs. scan-secrets.sh runs on every push.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(255,82,82,.12);color:var(--red);">📊</div>
+        <div>
+          <h3>Honest reporting</h3>
+          <p>Tests and checks are never claimed as passing if they were not run. Every unexecuted check is listed explicitly under "Not Executed."</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(159,122,234,.12);color:var(--s1);">❓</div>
+        <div>
+          <h3>Ask before assuming</h3>
+          <p>Ambiguous requirements trigger a numbered list of clarification questions. Claude presents all questions at once and waits for answers before drafting anything.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(236,72,153,.12);color:var(--s5);">⚠️</div>
+        <div>
+          <h3>Surface conflicts</h3>
+          <p>When source files or documents disagree, the conflict is surfaced to the human with both sides shown. Claude never silently picks one value over another.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(110,231,183,.12);color:var(--s7);">🏗️</div>
+        <div>
+          <h3>Preserve architecture</h3>
+          <p>The approved architecture.md is not modified during implementation without a human-reviewed design change. Scope creep is caught and surfaced, not absorbed silently.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(252,211,77,.12);color:var(--s8);">📋</div>
+        <div>
+          <h3>One task at a time</h3>
+          <p>During /implement, Claude works on exactly one TASK from impl-plan.md at a time, runs tests after each, and updates the task status before moving to the next.</p>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-icon" style="background:rgba(52,211,153,.12);color:var(--s3);">🎛️</div>
+        <div>
+          <h3>Conditional activation</h3>
+          <p>Agents read Story Type from requirements.md before running any checklist. UI-specific areas (Area 11, Vitest/Playwright, WCAG NFRs, Section 8a security) activate only for UI and Full-Stack stories — never for API-only or Developer Tooling work.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── QUICK REFERENCE ───────────────────── -->
+  <section>
+    <p class="eyebrow">Reference</p>
+    <h2>Command Quick Reference</h2>
+    <p class="section-intro">All eight slash commands — their inputs, outputs, agents, and approval requirements. Story Type is written in Step 1 and propagated automatically to all subsequent steps.</p>
+
+    <div class="ref-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Agent</th>
+            <th>Reads</th>
+            <th>Produces</th>
+            <th>Approval</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cmd-col">/requirements</td>
+            <td class="agent-col">requirements-analyst</td>
+            <td class="mono-sm">docs/user-story.md</td>
+            <td class="mono-sm">requirements.md (+ Story Type)</td>
+            <td class="gate-y">Required</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/architecture</td>
+            <td class="agent-col">architect</td>
+            <td class="mono-sm">requirements.md (Story Type)</td>
+            <td class="mono-sm">architecture.md + ADRs</td>
+            <td class="gate-y">Required</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/design-review</td>
+            <td class="agent-col">design-reviewer</td>
+            <td class="mono-sm">architecture.md + requirements.md</td>
+            <td class="mono-sm">design-review.md</td>
+            <td class="gate-y">Required</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/plan</td>
+            <td class="agent-col">implementation-planner</td>
+            <td class="mono-sm">requirements + architecture + design-review</td>
+            <td class="mono-sm">impl-plan.md</td>
+            <td class="gate-y">Required</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/implement</td>
+            <td class="agent-col">—</td>
+            <td class="mono-sm">impl-plan.md + CLAUDE.md</td>
+            <td class="mono-sm">src/ + tests/ files</td>
+            <td class="gate-y">Per commit</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/review</td>
+            <td class="agent-col">code-reviewer</td>
+            <td class="mono-sm">git diff + Story Type</td>
+            <td class="mono-sm">Findings report (10 or 11 areas)</td>
+            <td class="gate-y">Human decides</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/verify</td>
+            <td class="agent-col">test-engineer + doc-reviewer</td>
+            <td class="mono-sm">Source + docs + Story Type</td>
+            <td class="mono-sm">Verification report (backend + UI if applicable)</td>
+            <td class="gate-y">Human reviews</td>
+          </tr>
+          <tr>
+            <td class="cmd-col">/prepare-pr</td>
+            <td class="agent-col">—</td>
+            <td class="mono-sm">All artifacts + git diff</td>
+            <td class="mono-sm">Staged commit + PR description</td>
+            <td class="gate-y">Before push</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <span>TaskLite · Automated Documentation Sync · Agentic SDLC</span>
+  <span>Built with Claude Code · 2026</span>
+</footer>
