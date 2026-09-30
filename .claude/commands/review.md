@@ -12,7 +12,7 @@ Use `/review` when implementation is complete and before creating a pull request
 
 ## Preconditions
 
-- Implementation tasks in `impl-plan.md` must be marked "Complete" (or "In Progress" for partial review)
+- Implementation tasks in `docs/impl-plan.md` must be marked "Complete" (or "In Progress" for partial review)
 - All tests must have been run and results available
 
 ---
@@ -22,7 +22,7 @@ Use `/review` when implementation is complete and before creating a pull request
 1. **Load skill:** Read `.claude/skills/code-review/SKILL.md`
 2. **Load agent:** Apply the rules from `.claude/agents/code-reviewer.md`
 3. **Identify scope:** Run `git diff main` to see all changed files
-4. **Read reference docs:** Read `requirements.md`, `architecture.md`, `design-review.md`
+4. **Read reference docs:** Read `docs/requirements.md`, `docs/architecture.md`, `docs/design-review.md`
 5. **Apply ten-area checklist:** Review each changed file against all ten areas
 6. **Classify findings:** Critical / Major / Minor / Info with file:line references
 7. **Check test coverage:** Verify coverage meets 80 % threshold for `src/docs-sync/`

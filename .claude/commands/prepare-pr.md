@@ -37,7 +37,7 @@ Stage only the files that are part of this feature. Do NOT use `git add -A` or `
 git add backend/src/docs-sync/
 git add backend/tests/
 git add docs/
-git add requirements.md architecture.md design-review.md impl-plan.md CHANGELOG.md
+git add docs/requirements.md docs/architecture.md docs/design-review.md docs/impl-plan.md CHANGELOG.md
 ```
 
 **Show the human the staged diff before committing:**
@@ -89,12 +89,12 @@ Generate the full PR description using this template:
 - `backend/src/docs-sync/` — <description>
 - `docs/api/` — <description>
 - `tests/` — <description>
-- `requirements.md`, `architecture.md`, etc. — SDLC artifacts
+- `docs/requirements.md`, `docs/architecture.md`, etc. — SDLC artifacts
 
 ## Requirements and Design
 
 - Addresses: FR-001 through FR-008, NFR-001 through NFR-005
-- Architecture decisions: See `architecture.md` and `docs/decisions/`
+- Architecture decisions: See `docs/architecture.md` and `docs/decisions/`
 - Design review findings resolved: CI-001, CI-002, CI-003
 
 ## Test Evidence

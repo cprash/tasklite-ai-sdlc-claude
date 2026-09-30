@@ -21,10 +21,6 @@ tasklite-ai-sdlc-claude/
 ├── CLAUDE.md                  ← you are here
 ├── README.md
 ├── CHANGELOG.md
-├── requirements.md            ← approved requirements
-├── architecture.md            ← approved architecture
-├── design-review.md           ← design review findings
-├── impl-plan.md               ← ordered implementation plan
 ├── .claude/
 │   ├── settings.json
 │   ├── agents/                ← specialised subagent definitions
@@ -35,8 +31,13 @@ tasklite-ai-sdlc-claude/
 ├── backend/                   ← Express + Prisma API
 ├── frontend/                  ← React + Vite UI
 ├── docs/
+│   ├── requirements.md        ← approved requirements
+│   ├── architecture.md        ← approved architecture
+│   ├── design-review.md       ← design review findings
+│   ├── impl-plan.md           ← ordered implementation plan
 │   ├── user-story.md
 │   ├── technical-profile.md
+│   ├── stories/               ← per-feature user stories
 │   └── decisions/             ← Architecture Decision Records
 └── scripts/                   ← quality, validation, and security scripts
 ```
@@ -47,10 +48,10 @@ tasklite-ai-sdlc-claude/
 
 When starting any task, read in this order:
 
-1. `requirements.md` — what we are building
-2. `architecture.md` — how it is designed
-3. `design-review.md` — constraints and decisions
-4. `impl-plan.md` — current task status
+1. `docs/requirements.md` — what we are building
+2. `docs/architecture.md` — how it is designed
+3. `docs/design-review.md` — constraints and decisions
+4. `docs/impl-plan.md` — current task status
 
 ---
 
@@ -79,10 +80,10 @@ Every feature follows these eight steps, each requiring human review before proc
 
 | Step | Command | Output |
 |------|---------|--------|
-| 1. Requirements | `/requirements` | `requirements.md` |
-| 2. Architecture | `/architecture` | `architecture.md` |
-| 3. Design Review | `/design-review` | `design-review.md` |
-| 4. Implementation Plan | `/plan` | `impl-plan.md` |
+| 1. Requirements | `/requirements` | `docs/requirements.md` |
+| 2. Architecture | `/architecture` | `docs/architecture.md` |
+| 3. Design Review | `/design-review` | `docs/design-review.md` |
+| 4. Implementation Plan | `/plan` | `docs/impl-plan.md` |
 | 5. Implementation | `/implement` | Source + tests |
 | 6. Code Review | `/review` | Review findings |
 | 7. Verification | `/verify` | Verification report |
@@ -125,12 +126,12 @@ The following actions require explicit human approval **before** Claude executes
 - `git push` — confirm target branch and commits, wait for approval
 - `gh pr create` — show full PR description, wait for approval
 - `git merge` — confirm source/target, wait for approval
-- Any significant architectural change not covered by `design-review.md`
-- Any new external dependency not listed in `architecture.md`
+- Any significant architectural change not covered by `docs/design-review.md`
+- Any new external dependency not listed in `docs/architecture.md`
 
 ### Conflict Resolution
 - When two source files disagree, highlight the conflict; do not silently choose one
-- When a new requirement conflicts with `architecture.md`, surface it and ask
+- When a new requirement conflicts with `docs/architecture.md`, surface it and ask
 
 ### Transparency
 - Report failures honestly — do not claim tests or checks passed if they were not executed
@@ -142,8 +143,8 @@ The following actions require explicit human approval **before** Claude executes
 
 - Commit, push, create a PR, or merge without explicit human approval
 - Invent acceptance criteria, owners, SLAs, or environment values
-- Add features or abstractions not called for by `impl-plan.md`
-- Modify `architecture.md` without a reviewed design change
+- Add features or abstractions not called for by `docs/impl-plan.md`
+- Modify `docs/architecture.md` without a reviewed design change
 - Skip linting, type-checking, or tests before marking a task complete
 - Include sensitive content in prompts, logs, or documentation
 

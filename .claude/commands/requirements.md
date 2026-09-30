@@ -15,10 +15,10 @@ Use `/requirements` when starting a new feature or when the user story has been 
 1. **Load skill:** Read `.claude/skills/requirements-analysis/SKILL.md`
 2. **Load agent:** Apply the rules from `.claude/agents/requirements-analyst.md`
 3. **Read source:** Read `docs/user-story.md`
-4. **Read existing:** Read `requirements.md` if it exists (for revision context)
+4. **Read existing:** Read `docs/requirements.md` if it exists (for revision context)
 5. **Identify ambiguities:** Formulate clarification questions
 6. **Present questions:** Show questions to the human and wait for answers
-7. **Draft requirements:** Write the full `requirements.md` using the template from the skill
+7. **Draft requirements:** Write the full `docs/requirements.md` using the template from the skill
 8. **Present for review:** Show the draft to the human
 9. **Wait for approval:** Do not proceed to `/architecture` until the human approves
 
@@ -26,13 +26,13 @@ Use `/requirements` when starting a new feature or when the user story has been 
 
 ## Output
 
-`requirements.md` at the project root.
+`docs/requirements.md`
 
 ---
 
 ## Human Approval
 
-The human must explicitly approve `requirements.md` before it is treated as the source of truth for architecture and implementation. Approval is recorded by the human committing the file to Git.
+The human must explicitly approve `docs/requirements.md` before it is treated as the source of truth for architecture and implementation. Approval is recorded by the human committing the file to Git.
 
 ---
 
