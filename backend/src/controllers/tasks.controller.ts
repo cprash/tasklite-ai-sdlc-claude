@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
-import { createTaskSchema, updateTaskStatusSchema } from "../validators/task.validators.js";
+import { createTaskSchema, updateTaskStatusSchema, updateTaskTitleSchema } from "../validators/task.validators.js";
 import { HttpError } from "../utils/httpError.js";
 
 export async function listTasks(_req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -46,6 +46,36 @@ export async function updateTaskStatus(req: Request, res: Response, next: NextFu
     const task = await prisma.task.update({
       where: { id },
       data: { status: parsed.data.status },
+    });
+    res.json(task);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      next(new HttpError(404, "Task not found"));
+      return;
+    }
+    next(error);
+  }
+}
+
+export async function updateTaskTitle(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      // A non-integer id can never match a task row → treat as not found.
+      throw new HttpError(404, "Task not found");
+    }
+
+    const parsed = updateTaskTitleSchema.safeParse(req.body);
+    if (!parsed.success) {
+      // Surface the specific rule that failed (empty/whitespace or too long).
+      throw new HttpError(400, parsed.error.issues[0]?.message ?? "title is invalid");
+    }
+
+    // parsed.data.title is already trimmed by the schema, so the stored
+    // value is the trimmed title.
+    const task = await prisma.task.update({
+      where: { id },
+      data: { title: parsed.data.title },
     });
     res.json(task);
   } catch (error) {

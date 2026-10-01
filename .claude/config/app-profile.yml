@@ -17,7 +17,7 @@ tech:
   languages: [TypeScript]
   frameworks: [Express, React, Prisma]
   package_manager: "npm"
-  datastore: "PostgreSQL"
+  datastore: "SQLite"      # per backend/prisma/schema.prisma (provider = "sqlite")
 
 data_model:
   # The complete set of entities/tables/collections the agents may mention.
