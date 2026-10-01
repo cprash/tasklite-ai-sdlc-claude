@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Backend persistence for edited task titles: `PATCH /api/tasks/:id` validates a
+  non-empty, ≤255-char title with Zod (stored trimmed), returns the updated task
+  (200), and maps unknown/non-integer ids to 404 and invalid bodies to 400
+  (EPMCDMETST-66640)
+- `updateTaskTitleSchema` validator and `updateTaskTitle` controller handler
+- Vitest + Supertest suite for the title-edit endpoint (AC1–AC3 plus non-integer
+  id and over-length edges; 6 tests)
+- SDLC: `docs/EPMCDMETST-66640/` artifact bundle (requirements, architecture,
+  design review, impl plan, code review, verification, trace log, handoff)
 - Inline edit mode entry for task titles (`TaskItem`, `TaskList`, `App`)
 - `editingTaskId` state in `App` for mutual exclusion — only one task in edit mode at a time
 - Edit button with accessible `aria-label` per task item
