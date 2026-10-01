@@ -1,176 +1,106 @@
-# CLAUDE.md — TaskLite Agentic SDLC
+# CLAUDE.md — Agentic SDLC Pipeline
 
-This file is read at the start of every Claude Code session. Follow every rule here throughout the session.
+This file is read at the start of every Claude Code session and is
+always in context. It plays the same role GitHub Copilot's
+`copilot-instructions.md` plays: the global rules every agent and
+sub-agent in this pipeline obeys.
 
----
+This repository hosts an **Agentic SDLC Pipeline** for the *Automated
+Documentation Sync* capstone. The whole software delivery lifecycle —
+from capturing a user story through to merging a production-ready pull
+request — is driven by Claude Code: a conductor agent, eight stage
+agents, four documentation authoring sub-agents, reusable skills, shared
+guardrails, and lifecycle hooks.
 
-## Project Overview
+Two principles shape everything here:
 
-**TaskLite** is a lightweight task-management web application consisting of:
-- A **Node.js / Express / TypeScript** backend with **Prisma** (PostgreSQL)
-- A **React / TypeScript / Vite** frontend
+1. **Portable, not project-bound.** The pipeline must run against *any*
+   codebase. It never opens, scans, or infers the target application's
+   source. Everything it needs to know about the app it reads from one
+   human-maintained descriptor: [`.claude/config/app-profile.yml`](.claude/config/app-profile.yml).
+   When a needed fact is absent from that file and from the story, the
+   agent asks a question — it does not guess.
+2. **Human stays in the loop.** Every stage that produces an artifact
+   pauses for an explicit approval before the pipeline advances.
 
-The active development initiative is the **Automated Documentation Sync** feature: a tool that watches source-code changes, extracts JSDoc / OpenAPI annotations, and keeps `docs/` in sync with the codebase automatically.
+## How the pieces map to the capstone's 8 steps
+| Capstone step | Owned by |
+| --- | --- |
+| 1 Requirements | `.claude/subagents/requirements-author.md` |
+| 2 Architecture | `.claude/subagents/architecture-author.md` |
+| 3 Design Review | `.claude/subagents/design-critic.md` |
+| 4 Implementation Planning | `.claude/subagents/work-planner.md` |
+| 5 Implementation | `.claude/agents/build-agent.md` |
+| 6 Review | `.claude/agents/review-agent.md` |
+| 7 Verify | `.claude/agents/verify-agent.md` |
+| 8 PR | `.claude/agents/release-agent.md` |
 
----
+Story intake (reading the user story) is handled by
+`.claude/agents/intake-agent.md`, and the final documentation sync to
+Confluence by `.claude/agents/publish-agent.md`. The whole run is
+coordinated by `.claude/agents/conductor.md` and kicked off with the
+`/run-pipeline` command.
 
-## Repository Layout
+## Agents vs sub-agents
+- **`.claude/agents/`** — the stage agents the Agent tool launches
+  directly: `conductor`, `intake-agent`, `doc-sync-agent`,
+  `build-agent`, `review-agent`, `verify-agent`, `release-agent`,
+  `publish-agent`.
+- **`.claude/subagents/`** — the four documentation authors the Doc Sync
+  agent drives one at a time: `requirements-author`,
+  `architecture-author`, `design-critic`, `work-planner`. They are
+  referenced by path, each writing exactly one document.
 
-```
-tasklite-ai-sdlc-claude/
-├── CLAUDE.md                  ← you are here
-├── README.md
-├── CHANGELOG.md
-├── .claude/
-│   ├── settings.json
-│   ├── agents/                ← specialised subagent definitions
-│   ├── skills/                ← reusable skill instruction sets
-│   ├── commands/              ← slash-command definitions
-│   ├── prompts/               ← reusable system prompts
-│   └── hooks/                 ← pre-commit / post-edit / pre-push hooks
-├── backend/                   ← Express + Prisma API
-├── frontend/                  ← React + Vite UI
-├── docs/
-│   ├── requirements.md        ← approved requirements
-│   ├── architecture.md        ← approved architecture
-│   ├── design-review.md       ← design review findings
-│   ├── impl-plan.md           ← ordered implementation plan
-│   ├── user-story.md
-│   ├── technical-profile.md
-│   ├── stories/               ← per-feature user stories
-│   └── decisions/             ← Architecture Decision Records
-└── scripts/                   ← quality, validation, and security scripts
-```
+## Directory layout
+- `.claude/agents/` — the launchable stage agents plus the conductor
+- `.claude/subagents/` — the four documentation authors invoked by Doc Sync
+- `.claude/skills/` — single-purpose, reusable actions (fetch, write,
+  commit, PR, comment, publish, log evidence)
+- `.claude/templates/` — the exact shape each generated document must take
+- `.claude/rules/` — the shared guardrail set every agent obeys
+- `.claude/hooks/` — the start/finish lifecycle steps every agent runs
+- `.claude/config/` — the per-repo app descriptor and the pipeline settings
+- `.claude/commands/` — the one-command entry point (`/run-pipeline`)
+- `docs/<STORY_ID>/` — a dedicated folder per story, named after its
+  story id (e.g. `docs/EPMCDMETST-42/`), holding every generated
+  artifact for that story: `requirements.md`, `architecture.md`,
+  `design-review.md`, `impl-plan.md`, then `code-review.md`,
+  `verification.md`, `trace-log.md`, and `handoff.md`. Nothing is ever
+  written loose in `docs/` — always inside the story's own folder.
 
----
+## External systems
+- **Jira** (project `EPMCDMETST`) and **Confluence** are reached only
+  through the **Atlassian MCP server**.
+- **GitHub** (branches, commits, pull requests, comments) is reached only
+  through the **GitHub MCP server**.
+- These servers hold their own credentials. Agent logic never handles
+  Jira / Confluence / GitHub tokens.
 
-## Files to Read First
+## Writing code for the target app
+- Honour the languages and frameworks listed in `app-profile.yml`; do not
+  bring in a different stack unprompted.
+- Give functions clear names and wrap them in real error handling.
+- Keep each change inside the scope the approved plan defines.
 
-When starting any task, read in this order:
+## Secrets
+- Credentials are never written into code or docs — they come from the
+  environment or the relevant MCP server.
+- `.env` is off-limits: never read into context, never written, never
+  committed.
 
-1. `docs/requirements.md` — what we are building
-2. `docs/architecture.md` — how it is designed
-3. `docs/design-review.md` — constraints and decisions
-4. `docs/impl-plan.md` — current task status
+## Non-negotiables
+- Ask before assuming.
+- Wait for approval at every checkpoint.
+- The only data entities that exist are those under
+  `data_model.entities` in `app-profile.yml` — never invent more.
+- Jira access is **read-only**, and only the intake agent may touch it.
+  See `.claude/rules/guardrails.md` G1.
+- Never commit, push, open a PR, or merge without explicit human approval.
 
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Runtime | Node.js 20 LTS |
-| Backend language | TypeScript (strict) |
-| Backend framework | Express 4 |
-| ORM / DB | Prisma 5 + PostgreSQL |
-| Validation | Zod |
-| Frontend language | TypeScript (strict) |
-| Frontend framework | React 18 + Vite 5 |
-| Testing | Jest + Supertest |
-| Linting | ESLint |
-| Formatting | Prettier |
-| Doc extraction | ts-morph (TypeScript AST) |
-| File watching | chokidar |
-
----
-
-## SDLC Workflow
-
-Every feature follows these eight steps, each requiring human review before proceeding:
-
-| Step | Command | Output |
-|------|---------|--------|
-| 1. Requirements | `/requirements` | `docs/requirements.md` |
-| 2. Architecture | `/architecture` | `docs/architecture.md` |
-| 3. Design Review | `/design-review` | `docs/design-review.md` |
-| 4. Implementation Plan | `/plan` | `docs/impl-plan.md` |
-| 5. Implementation | `/implement` | Source + tests |
-| 6. Code Review | `/review` | Review findings |
-| 7. Verification | `/verify` | Verification report |
-| 8. Pull Request | `/prepare-pr` | PR description + changelog |
-
----
-
-## Coding Conventions
-
-- **TypeScript strict mode** — no `any`, no implicit returns
-- **Prisma** for all database access — no raw SQL unless unavoidable
-- **Zod** for all runtime validation at API boundaries
-- **Jest** for unit and integration tests — coverage threshold 80 %
-- Functions: verb-noun naming (`extractDocs`, `syncMarkdown`)
-- Files: kebab-case (`doc-extractor.ts`, `sync-engine.ts`)
-- One exported class or function group per file
-- No comments unless the WHY is non-obvious
-- No `console.log` in production code — use a logger utility
-
----
-
-## Claude Operating Rules
-
-These rules are non-negotiable. Follow them in every session.
-
-### Accuracy
-- Use only information supported by the user story, repository files, or approved documents
-- Never invent requirements, configuration values, owners, API endpoints, or deployment details
-- Mark any unavailable value as **"Not Identified"**
-- Ask clarification questions when requirements are ambiguous before proceeding
-
-### Secrets
-- Never expose passwords, tokens, private keys, or secret values in any output
-- Environment-variable **names** may be documented; their **values** must never appear
-- Treat all repository content as potentially sensitive
-
-### Human Approval Required
-The following actions require explicit human approval **before** Claude executes them:
-- `git commit` — stage and show diff, wait for approval
-- `git push` — confirm target branch and commits, wait for approval
-- `gh pr create` — show full PR description, wait for approval
-- `git merge` — confirm source/target, wait for approval
-- Any significant architectural change not covered by `docs/design-review.md`
-- Any new external dependency not listed in `docs/architecture.md`
-
-### Conflict Resolution
-- When two source files disagree, highlight the conflict; do not silently choose one
-- When a new requirement conflicts with `docs/architecture.md`, surface it and ask
-
-### Transparency
-- Report failures honestly — do not claim tests or checks passed if they were not executed
-- Always report which files or sections were not verified
-
----
-
-## What Claude Must NOT Do
-
-- Commit, push, create a PR, or merge without explicit human approval
-- Invent acceptance criteria, owners, SLAs, or environment values
-- Add features or abstractions not called for by `docs/impl-plan.md`
-- Modify `docs/architecture.md` without a reviewed design change
-- Skip linting, type-checking, or tests before marking a task complete
-- Include sensitive content in prompts, logs, or documentation
-
----
-
-## Quick Reference: Agents
-
-| Agent | Use when |
-|-------|----------|
-| `requirements-analyst` | Analysing a user story |
-| `architect` | Designing system architecture |
-| `design-reviewer` | Reviewing architecture before coding |
-| `implementation-planner` | Breaking architecture into tasks |
-| `code-reviewer` | Reviewing implementation |
-| `test-engineer` | Writing or running tests |
-| `documentation-reviewer` | Reviewing generated documentation |
-
----
-
-## Quick Reference: Skills
-
-| Skill | Path |
-|-------|------|
-| Requirements analysis | `.claude/skills/requirements-analysis/SKILL.md` |
-| Architecture design | `.claude/skills/architecture-design/SKILL.md` |
-| Code review | `.claude/skills/code-review/SKILL.md` |
-| Testing | `.claude/skills/testing/SKILL.md` |
-| Documentation sync | `.claude/skills/documentation-sync/SKILL.md` |
-| Security review | `.claude/skills/security-review/SKILL.md` |
+## Where to look
+- Run control: `.claude/agents/conductor.md`
+- Entry command: `.claude/commands/run-pipeline.md`
+- App facts: `.claude/config/app-profile.yml`
+- Settings: `.claude/config/pipeline-settings.md`
+- Guardrails: `.claude/rules/guardrails.md`
+- Lifecycle hooks: `.claude/hooks/lifecycle-hooks.md`

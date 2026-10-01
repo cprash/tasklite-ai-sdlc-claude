@@ -1,0 +1,54 @@
+# ===========================================================================
+# app-profile.yml  —  the one place this pipeline learns about your app
+# ===========================================================================
+# Fill this in once, per repository, and keep it current. Every agent and
+# sub-agent reads these values instead of inspecting your source code, which
+# is what lets the same pipeline run against any application.
+#
+# Golden rule: if an agent needs a fact that is not written here and not in
+# the Jira/Confluence/Word story, it must ASK you — never invent it.
+# ===========================================================================
+
+app:
+  name: "TaskLite"
+  summary: "A lightweight task management app"
+
+tech:
+  languages: [TypeScript]
+  frameworks: [Express, React, Prisma]
+  package_manager: "npm"
+  datastore: "PostgreSQL"
+
+data_model:
+  # The complete set of entities/tables/collections the agents may mention.
+  # Nothing outside this list may appear in requirements, design, or code.
+  entities: [tasks]
+  notes: "task: id (Int, PK, autoincrement), title (String), status (TaskStatus enum, default OPEN), createdAt (DateTime), updatedAt (DateTime). Source: backend Prisma schema."
+
+local_run:
+  install: "npm --prefix backend install && npm --prefix frontend install"
+  build: "npm --prefix backend run build && npm --prefix frontend run build"
+  start: "npm --prefix backend run dev"   # API; also run `npm --prefix frontend run dev` in a 2nd terminal for the UI
+  url: "http://localhost:5173"
+  health_check: ""         # optional URL/command proving the app is up
+
+code_locations: [backend/src, frontend/src]
+
+github:
+  repo: "cprash/tasklite-ai-sdlc-claude"
+  base_branch: "main"
+
+jira:
+  project_key: "EPMCDMETST"
+  story_pattern: "EPMCDMETST-<number>"
+
+confluence:
+  space_key: "TaskLite"     # where the batch summary lands. If you want a
+                           # default tied to the Jira project, use "EPMCDME".
+                           # Blank => the publish agent asks before posting.
+  parent_page_id: ""       # optional: nest the summary under this page
+
+quality:
+  test_tool: "Vitest"      # backend + frontend both use Vitest; backend adds Supertest for API/integration tests
+  tests_path: "tests/"     # where automated tests live
+  evidence_path: "tests/evidence/"  # where run logs are stored
