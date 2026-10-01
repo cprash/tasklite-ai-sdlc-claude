@@ -24,8 +24,9 @@ Release (Step 8) — 2026-10-01T10:30:00Z — PR #2 OPEN: https://github.com/cpr
 - Branch feature/EPMCDMETST-66640-edit-task-title, commit b7d6e55 (pushed)
 
 ## Do next
-Launch: release-agent (final step)
-- Second commit on the feature branch: code-review.md, verification.md, the evidence log, CHANGELOG.md, trace-log.md, handoff.md
-- Open the PR via gh (title `EPMCDMETST-66640: Persist edited task title`, base `main`) using temp/pr-body-EPMCDMETST-66640.md
-- Post the 4 approved code-review findings as a PR comment
-- The human merges (no agent merges — G2). Then optionally run publish-agent for the Confluence summary page.
+Pipeline COMPLETE (Steps 1–8 + Publish). Remaining human-only actions:
+- Push bookkeeping commit 417559d and post the code-review findings as a PR comment (`gh pr comment` — host classifier blocked the agent).
+- Merge PR #2 (no agent merges — G2), then update the Confluence page's PR Reference from "open/[pending] merge" to "merged".
+- Move Jira EPMCDMETST-66640 to the appropriate status (human-only — G1).
+
+Confluence summary page (live): https://epamrahulsharma7.atlassian.net/wiki/spaces/TaskLite/pages/43843585
