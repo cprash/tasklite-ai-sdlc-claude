@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Doc Sync Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #f6f8fb;
+    --ink: #161c27;
+    --muted: #5a6676;
+    --line: #dde3ea;
+    --accent: #3a5bd9;
+    --accent-soft: #e7ecfd;
+    --focus: #0e7c6b;
+    --focus-soft: #d7efeb;
+    --warn: #915400;
+    --warn-soft: #f8e9c9;
+    --ok: #1b7a3d;
+    --ok-soft: #d8f0df;
+    --danger: #b42c47;
+    --danger-soft: #fadfe5;
+    --shadow: 0 1px 2px rgba(22,28,39,.06), 0 8px 24px rgba(22,28,39,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0f141c;
+      --surface: #161d28;
+      --surface-2: #1b2430;
+      --ink: #e8edf4;
+      --muted: #9aa7b8;
+      --line: #2a3542;
+      --accent: #8aa2ff;
+      --accent-soft: #1e2a4d;
+      --focus: #53c9b4;
+      --focus-soft: #123630;
+      --warn: #e3a94a;
+      --warn-soft: #392d12;
+      --ok: #5fcf86;
+      --ok-soft: #163522;
+      --danger: #f08097;
+      --danger-soft: #3a1620;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0f141c;
+    --surface: #161d28;
+    --surface-2: #1b2430;
+    --ink: #e8edf4;
+    --muted: #9aa7b8;
+    --line: #2a3542;
+    --accent: #8aa2ff;
+    --accent-soft: #1e2a4d;
+    --focus: #53c9b4;
+    --focus-soft: #123630;
+    --warn: #e3a94a;
+    --warn-soft: #392d12;
+    --ok: #5fcf86;
+    --ok-soft: #163522;
+    --danger: #f08097;
+    --danger-soft: #3a1620;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .topbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1080px; margin: 0 auto;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .brand { font-family: "Archivo", sans-serif; font-weight: 700; letter-spacing: -.01em; font-size: 15px; }
+  .brand .dot { color: var(--focus); }
+  .legend { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 20px; padding-block: 28px 72px; }
+
+  h1 { font-family: "Archivo", sans-serif; font-weight: 700; letter-spacing: -.02em; font-size: clamp(28px, 5vw, 44px); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
+  h2 { font-family: "Archivo", sans-serif; font-weight: 600; letter-spacing: -.01em; font-size: clamp(19px, 3vw, 24px); margin: 0 0 4px; text-wrap: balance; }
+  h3 { font-family: "Archivo", sans-serif; font-weight: 600; font-size: 15px; margin: 0; }
+  .eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--focus); font-weight: 600; }
+  .lede { font-size: clamp(15px, 2.4vw, 18px); color: var(--muted); max-width: 68ch; }
+
+  section { margin-top: 48px; }
+  .sec-head { margin-bottom: 18px; }
+  .sec-head .eyebrow { color: var(--accent); }
+
+  .hero {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: clamp(22px, 4vw, 36px);
+    box-shadow: var(--shadow);
+  }
+  .path-line { margin-top: 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .path-line .arrow { color: var(--muted); }
+
+  /* chips & badges */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; line-height: 1;
+    padding: 5px 9px; border-radius: 999px; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .chip .sw { width: 8px; height: 8px; border-radius: 2px; }
+  .c-write { background: var(--accent-soft); color: var(--accent); }
+  .c-check { background: var(--warn-soft); color: var(--warn); }
+  .c-read  { background: var(--surface-2); color: var(--muted); border-color: var(--line); }
+  .c-guard { background: var(--danger-soft); color: var(--danger); }
+  .c-focus { background: var(--focus-soft); color: var(--focus); }
+
+  .tag { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; white-space: nowrap; display: inline-block; }
+  .tag.g { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
+
+  /* pipeline strip */
+  .flow { overflow-x: auto; padding-bottom: 8px; }
+  .flow-track { display: flex; align-items: stretch; gap: 0; min-width: max-content; }
+  .stage {
+    min-width: 150px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px 13px; box-shadow: var(--shadow); position: relative;
+  }
+  .stage + .stage { margin-left: 26px; }
+  .stage + .stage::before {
+    content: "→"; position: absolute; left: -22px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 16px;
+  }
+  .stage .step { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .stage .nm { font-family: "Archivo", sans-serif; font-weight: 600; font-size: 14px; margin: 3px 0 2px; }
+  .stage .ag { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--accent); }
+  .stage.is-focus { border-color: var(--focus); background: var(--focus-soft); }
+  .stage.is-focus .ag { color: var(--focus); }
+  .stage.is-focus .nm::after { content: " ★"; color: var(--focus); }
+
+  /* generic card grid */
+  .grid { display: grid; gap: 16px; }
+  @media (min-width: 640px) { .cols-2 { grid-template-columns: 1fr 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; box-shadow: var(--shadow);
+  }
+  .card.focus { border-color: var(--focus); border-width: 1.5px; }
+  .card-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .card-head .idx { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--focus); font-weight: 600; }
+  .card p { margin: 6px 0 0; font-size: 14px; }
+  .kv { margin: 12px 0 0; display: grid; gap: 8px; }
+  .kv .row { display: grid; grid-template-columns: 92px 1fr; gap: 10px; font-size: 13px; align-items: start; }
+  .kv .row .k { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding-top: 2px; }
+  .kv .row .v { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  ul.clean { margin: 10px 0 0; padding-left: 18px; font-size: 14px; }
+  ul.clean li { margin: 4px 0; }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 13px; }
+  th, td { text-align: left; padding: 11px 13px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  thead th { background: var(--surface-2); font-family: "Archivo", sans-serif; font-weight: 600; font-size: 12px; position: sticky; top: 0; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.focus-row { background: var(--focus-soft); }
+  td .tag { margin: 1px 2px 1px 0; }
+  td .agn { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12.5px; }
+
+  /* outputs map */
+  .files { display: grid; gap: 10px; }
+  .file {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
+  }
+  .file .fp { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 500; }
+  .file .by { font-size: 12px; color: var(--muted); }
+  .file .by b { color: var(--ink); font-weight: 600; }
+  .grouphead { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .04em; color: var(--muted); margin: 16px 0 2px; }
+
+  .note { background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid var(--focus); border-radius: 10px; padding: 13px 15px; font-size: 14px; }
+  .note b { font-family: "Archivo", sans-serif; }
+
+  .miss { display: grid; gap: 12px; }
+  .miss .m { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .miss .m h3 { margin-bottom: 5px; }
+  .miss .m p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .miss .m p b { color: var(--ink); }
+
+  .footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  a { color: var(--accent); }
+  .warnbox { background: var(--danger-soft); border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--line)); border-radius: 12px; padding: 14px 16px; font-size: 13.5px; }
+  .warnbox b { color: var(--danger); font-family: "Archivo", sans-serif; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="brand">Doc Sync<span class="dot">·</span>Pipeline</span>
+    <span class="legend">
+      <span class="chip c-focus"><span class="sw" style="background:var(--focus)"></span>Doc Sync focus</span>
+      <span class="chip c-check">Human checkpoint</span>
+      <span class="chip c-write">Writes</span>
+      <span class="chip c-read">Read-only</span>
+      <span class="chip c-guard">Guardrail</span>
+    </span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="eyebrow">Automated Documentation Sync · capstone steps 1–4</span>
+    <h1>How the Doc Sync agent works</h1>
+    <p class="lede">Doc Sync is the heart of the pipeline. It drives four documentation authors over one story — in strict order, with a human approval after each — and leaves a four-file bundle on disk for the Build stage to commit. Here is exactly what it invokes, what every other stage does around it, and where each artifact lands.</p>
+    <div class="path-line">
+      <span class="tag">/run-pipeline</span><span class="arrow">→</span>
+      <span class="tag">conductor</span><span class="arrow">→</span>
+      <span class="tag">intake-agent</span><span class="arrow">→</span>
+      <span class="tag" style="border-color:var(--focus);color:var(--focus)">doc-sync-agent</span><span class="arrow">→</span>
+      <span class="tag">build → review → verify → release → publish</span>
+    </div>
+  </div>
+
+  <!-- PIPELINE AT A GLANCE -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">01 · The whole run</span>
+      <h2>Every agent that gets invoked, in order</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-track">
+        <div class="stage"><div class="step">Intake</div><div class="nm">Story Intake</div><div class="ag">intake-agent</div></div>
+        <div class="stage is-focus"><div class="step">Steps 1–4</div><div class="nm">Doc Sync</div><div class="ag">doc-sync-agent</div></div>
+        <div class="stage"><div class="step">Step 5</div><div class="nm">Implementation</div><div class="ag">build-agent</div></div>
+        <div class="stage"><div class="step">Step 6</div><div class="nm">Review</div><div class="ag">review-agent</div></div>
+        <div class="stage"><div class="step">Step 7</div><div class="nm">Verify</div><div class="ag">verify-agent</div></div>
+        <div class="stage"><div class="step">Step 8</div><div class="nm">PR</div><div class="ag">release-agent</div></div>
+        <div class="stage"><div class="step">Sync</div><div class="nm">Publish</div><div class="ag">publish-agent</div></div>
+      </div>
+    </div>
+    <p class="lede" style="margin-top:14px">The <code>conductor</code> orchestrates all seven and never touches an external system itself — it only hands the baton on and holds at each checkpoint. <code>doc-sync-agent</code> is the one stage that in turn drives sub-agents.</p>
+  </section>
+
+  <!-- INSIDE DOC SYNC -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">02 · The focus</span>
+      <h2>Inside Doc Sync — the four authors it calls</h2>
+    </div>
+
+    <div class="card focus">
+      <div class="kv">
+        <div class="row"><span class="k">Starts</span><span class="v">Intake hands over a confirmed <code>EPMCDMETST-&lt;number&gt;</code> + the fetched story details.</span></div>
+        <div class="row"><span class="k">Sub-agents</span><span class="v"><span class="tag">requirements-author</span><span class="tag">architecture-author</span><span class="tag">design-critic</span><span class="tag">work-planner</span></span></div>
+        <div class="row"><span class="k">Skill</span><span class="v"><span class="tag">workspace-writer</span> <span class="chip c-read" style="font-weight:500">one batched trace-log write</span></span></div>
+        <div class="row"><span class="k">Rules</span><span class="v"><span class="tag g">G2</span> no commit / no PR &nbsp;<span class="tag g">G4</span> trace everything &nbsp;<span class="tag g">G7</span> stay in lane</span></div>
+        <div class="row"><span class="k">Hooks</span><span class="v">before-work · after-work <span class="chip c-write" style="font-weight:500">batches all four author rows → trace-log.md + handoff.md</span></span></div>
+        <div class="row"><span class="k">Checkpoint</span><span class="v"><span class="chip c-check">4 chat approvals — one per author</span></span></div>
+        <div class="row"><span class="k">Hands to</span><span class="v"><span class="tag">build-agent</span> once all four are approved</span></div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px">
+      <b>How it drives a sub-agent.</b> The four authors live in <code>.claude/subagents/</code> and are <b>referenced by path, not launched as Agent types</b>. Doc Sync reads each author's file and follows it to the letter, one at a time — never two at once, never skipping an author's questions or checkpoint.
+    </div>
+
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card">
+        <div class="card-head"><span class="idx">Step 1</span><h3>Requirements Author</h3></div>
+        <p>Turns the intake story into a requirements doc by asking <b>five clarifying questions in one message</b>, never guessing.</p>
+        <div class="kv">
+          <div class="row"><span class="k">Produces</span><span class="v"><code>requirements.md</code></span></div>
+          <div class="row"><span class="k">Uses</span><span class="v"><span class="tag">workspace-writer</span><span class="tag">requirements.template.md</span></span></div>
+          <div class="row"><span class="k">Rules</span><span class="v"><span class="tag g">G4</span><span class="tag g">G2</span></span></div>
+          <div class="row"><span class="k">Check</span><span class="v"><span class="chip c-check">approve / reject</span></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="idx">Step 2</span><h3>Architecture Author</h3></div>
+        <p>Designs components, tech picks and data flow on the declared stack, with a Mermaid/ASCII diagram and the contracts touched.</p>
+        <div class="kv">
+          <div class="row"><span class="k">Produces</span><span class="v"><code>architecture.md</code></span></div>
+          <div class="row"><span class="k">Reads</span><span class="v"><code>requirements.md</code> + app-profile</span></div>
+          <div class="row"><span class="k">Uses</span><span class="v"><span class="tag">workspace-writer</span><span class="tag">architecture.template.md</span></span></div>
+          <div class="row"><span class="k">Rules</span><span class="v"><span class="tag g">G4</span><span class="tag g">G7</span><span class="tag g">G2</span></span></div>
+          <div class="row"><span class="k">Check</span><span class="v"><span class="chip c-check">approve / reject</span> · skippable w/ consent</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="idx">Step 3</span><h3>Design Critic</h3></div>
+        <p>Reviews the architecture through five lenses, gives an <b>APPROVED / NEEDS CHANGES</b> verdict, and routes fixes back — it never edits the architecture itself.</p>
+        <div class="kv">
+          <div class="row"><span class="k">Produces</span><span class="v"><code>design-review.md</code></span></div>
+          <div class="row"><span class="k">Reads</span><span class="v"><code>requirements.md</code> + <code>architecture.md</code></span></div>
+          <div class="row"><span class="k">Uses</span><span class="v"><span class="tag">workspace-writer</span><span class="tag">design-review.template.md</span></span></div>
+          <div class="row"><span class="k">Rules</span><span class="v"><span class="tag g">G7</span><span class="tag g">G4</span><span class="tag g">G2</span></span></div>
+          <div class="row"><span class="k">Check</span><span class="v"><span class="chip c-check">approve / reject</span> · skippable w/ consent</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="idx">Step 4</span><h3>Work Planner</h3></div>
+        <p>Breaks the reviewed design into dependency-ordered tasks (<code>T1, T2…</code>) with effort ratings and phases the Build agent can run without surprises.</p>
+        <div class="kv">
+          <div class="row"><span class="k">Produces</span><span class="v"><code>impl-plan.md</code></span></div>
+          <div class="row"><span class="k">Reads</span><span class="v">requirements + architecture + design-review</span></div>
+          <div class="row"><span class="k">Uses</span><span class="v"><span class="tag">workspace-writer</span><span class="tag">impl-plan.template.md</span></span></div>
+          <div class="row"><span class="k">Rules</span><span class="v"><span class="tag g">G7</span><span class="tag g">G2</span></span></div>
+          <div class="row"><span class="k">Check</span><span class="v"><span class="chip c-check">approve / reject</span> · skippable w/ consent</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px">
+      <b>The design-review loop.</b> If the Design Critic returns <code>NEEDS CHANGES</code>, Doc Sync sends only the specific edits back to the Architecture Author (targeted, not a rewrite), re-approves, then re-runs the review — before it ever lets the Work Planner start.
+    </div>
+  </section>
+
+  <!-- FULL MATRIX -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">03 · Reference matrix</span>
+      <h2>What every stage uses &amp; produces</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Stage</th><th>Sub-agents</th><th>Skills</th><th>Rules</th><th>Hooks</th><th>Human stop</th><th>Produces</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="agn">conductor</span><br><span class="by">orchestrator</span></td>
+            <td>launches all 7 stage agents</td>
+            <td><span class="by">none directly</span></td>
+            <td><span class="tag g">all</span></td>
+            <td><span class="by">delegates; each stage runs its own</span></td>
+            <td>holds at every stage's checkpoint</td>
+            <td><span class="by">routing only</span></td>
+          </tr>
+          <tr>
+            <td><span class="agn">intake-agent</span><br><span class="by">Step 1 · intake</span></td>
+            <td>—</td>
+            <td><span class="tag">story-fetcher</span><span class="tag">workspace-writer</span></td>
+            <td><span class="tag g">G1</span></td>
+            <td>before: skip · after: trace row (N/A)</td>
+            <td><span class="by">none of its own</span></td>
+            <td>story details (read-only); nothing to Jira</td>
+          </tr>
+          <tr class="focus-row">
+            <td><span class="agn">doc-sync-agent</span><br><span class="by">Steps 1–4</span></td>
+            <td><span class="tag">requirements-author</span><span class="tag">architecture-author</span><span class="tag">design-critic</span><span class="tag">work-planner</span></td>
+            <td><span class="tag">workspace-writer</span></td>
+            <td><span class="tag g">G2</span><span class="tag g">G4</span><span class="tag g">G7</span></td>
+            <td>before · after: <b>batched</b> 4 rows</td>
+            <td><span class="chip c-check">4×</span></td>
+            <td><code>requirements · architecture · design-review · impl-plan .md</code> + trace-log + handoff</td>
+          </tr>
+          <tr>
+            <td><span class="agn">build-agent</span><br><span class="by">Step 5 · implement</span></td>
+            <td>—</td>
+            <td><span class="tag">workspace-writer</span><span class="tag">branch-committer</span></td>
+            <td><span class="tag g">G5</span><span class="tag g">G4</span><span class="tag g">G7</span><span class="tag g">G2</span></td>
+            <td>before: confirm 4 docs · after: trace row</td>
+            <td><span class="chip c-check">before 1st commit</span></td>
+            <td>feature branch · docs bundle committed · code (no PR)</td>
+          </tr>
+          <tr>
+            <td><span class="agn">review-agent</span><br><span class="by">Step 6 · review</span></td>
+            <td>—</td>
+            <td><span class="tag">workspace-writer</span></td>
+            <td><span class="tag g">G6</span><span class="tag g">G7</span></td>
+            <td>before: confirm reqs + design · after: trace row</td>
+            <td><span class="chip c-check">approve findings</span></td>
+            <td><code>code-review.md</code> (7-area findings)</td>
+          </tr>
+          <tr>
+            <td><span class="agn">verify-agent</span><br><span class="by">Step 7 · verify</span></td>
+            <td>—</td>
+            <td><span class="tag">workspace-writer</span><span class="tag">branch-committer</span><span class="tag">evidence-logger</span></td>
+            <td><span class="tag g">G4</span><span class="tag g">G2</span></td>
+            <td>before: confirm reqs + local_run · after: 2 rows</td>
+            <td><span class="chip c-check">2× scope + pass/fail</span></td>
+            <td>tests committed · <code>verification.md</code> · evidence log</td>
+          </tr>
+          <tr>
+            <td><span class="agn">release-agent</span><br><span class="by">Step 8 · PR</span></td>
+            <td>—</td>
+            <td><span class="tag">branch-committer</span><span class="tag">pull-request-opener</span><span class="tag">review-poster</span><span class="tag">workspace-writer</span></td>
+            <td><span class="tag g">G6</span><span class="tag g">G2</span><span class="tag g">G5</span></td>
+            <td>before: confirm review + verify · after: 2 rows</td>
+            <td><span class="chip c-check">2× PR body + human merges</span></td>
+            <td>open PR (5 sections) · <code>CHANGELOG.md</code> · findings on PR</td>
+          </tr>
+          <tr>
+            <td><span class="agn">publish-agent</span><br><span class="by">Confluence sync</span></td>
+            <td>—</td>
+            <td><span class="tag">page-publisher</span><span class="tag">workspace-writer</span></td>
+            <td><span class="tag g">G3</span><span class="tag g">G4</span></td>
+            <td>before: confirm docs exist · after: final row</td>
+            <td><span class="chip c-check">sees page before posting</span></td>
+            <td>one Confluence summary page (configured space)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede" style="margin-top:12px">Launched by the <code>/run-pipeline</code> command, which is the pipeline's only entry command. Every stage reads app facts from <code>.claude/config/app-profile.yml</code> and never scans your source.</p>
+  </section>
+
+  <!-- OUTPUTS MAP -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">04 · Outputs</span>
+      <h2>Every artifact &amp; where it lands</h2>
+    </div>
+
+    <div class="grouphead">docs/{{STORY_ID}}/ &nbsp;— the story's own folder (e.g. docs/EPMCDMETST-42/)</div>
+    <div class="files">
+      <div class="file"><span class="fp">requirements.md</span><span class="by">by <b>requirements-author</b> · uncommitted until Build</span></div>
+      <div class="file"><span class="fp">architecture.md</span><span class="by">by <b>architecture-author</b> · uncommitted until Build</span></div>
+      <div class="file"><span class="fp">design-review.md</span><span class="by">by <b>design-critic</b> · uncommitted until Build</span></div>
+      <div class="file"><span class="fp">impl-plan.md</span><span class="by">by <b>work-planner</b> · uncommitted until Build</span></div>
+      <div class="file"><span class="fp">code-review.md</span><span class="by">by <b>review-agent</b> · 7-area findings</span></div>
+      <div class="file"><span class="fp">verification.md</span><span class="by">by <b>verify-agent</b> · traceability + counts + doc check</span></div>
+      <div class="file"><span class="fp">trace-log.md</span><span class="by"><b>append-only</b> · one row per stage (Doc Sync batches its 4)</span></div>
+      <div class="file"><span class="fp">handoff.md</span><span class="by"><b>overwritten</b> each stage · crash-resume snapshot</span></div>
+    </div>
+
+    <div class="grouphead">Elsewhere in the repo</div>
+    <div class="files">
+      <div class="file"><span class="fp">{{quality.evidence_path}}  (e.g. tests/evidence/)</span><span class="by">by <b>verify-agent</b> via evidence-logger</span></div>
+      <div class="file"><span class="fp">{{quality.tests_path}}  (e.g. tests/)</span><span class="by">generated tests, by <b>verify-agent</b></span></div>
+      <div class="file"><span class="fp">CHANGELOG.md</span><span class="by">entry by <b>release-agent</b></span></div>
+      <div class="file"><span class="fp">feature branch + commits</span><span class="by">by <b>build / verify / release</b> via branch-committer</span></div>
+    </div>
+
+    <div class="grouphead">External systems</div>
+    <div class="files">
+      <div class="file"><span class="fp">GitHub pull request</span><span class="by">by <b>release-agent</b> · GitHub MCP · human merges</span></div>
+      <div class="file"><span class="fp">Confluence summary page</span><span class="by">by <b>publish-agent</b> · Atlassian MCP · one page, one space</span></div>
+    </div>
+  </section>
+
+  <!-- SKILLS / RULES / HOOKS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">05 · The shared toolbox</span>
+      <h2>Skills, rules, hooks &amp; the entry command</h2>
+    </div>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Skills · <code>.claude/skills/</code></h3>
+        <ul class="clean">
+          <li><code>story-fetcher</code> — read a story from Jira / Confluence / Word (Atlassian MCP, read-only). <span class="by">Intake only.</span></li>
+          <li><code>workspace-writer</code> — write a file in the repo, never <code>.env</code>, never outside root. <span class="by">Nearly every stage.</span></li>
+          <li><code>branch-committer</code> — branch, stage, commit, push (GitHub MCP). Never base branch, never merge. <span class="by">Build · Verify · Release.</span></li>
+          <li><code>pull-request-opener</code> — open the PR with 5 sections (GitHub MCP). <span class="by">Release.</span></li>
+          <li><code>review-poster</code> — post approved findings as PR comments. <span class="by">Release.</span></li>
+          <li><code>page-publisher</code> — create/update the one Confluence page. <span class="by">Publish.</span></li>
+          <li><code>evidence-logger</code> — record the test counts a human reports. <span class="by">Verify.</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Guardrails · <code>.claude/rules/guardrails.md</code></h3>
+        <ul class="clean">
+          <li><span class="tag g">G1</span> Jira stays read-only — Intake only.</li>
+          <li><span class="tag g">G2</span> GitHub writes via named skills; feature branch only; <b>no agent merges</b>.</li>
+          <li><span class="tag g">G3</span> Confluence — one summary page, one space, Publish only.</li>
+          <li><span class="tag g">G4</span> Everything traces to a real source; gaps are <code>[pending]</code>; closed data model.</li>
+          <li><span class="tag g">G5</span> Secrets stay out; <code>.env</code> never read, written, or committed.</li>
+          <li><span class="tag g">G6</span> Checkpoints are real stops; nothing leaves the repo unseen.</li>
+          <li><span class="tag g">G7</span> Stay in your lane — each stage edits only the files it owns.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Lifecycle hooks · <code>.claude/hooks/</code></h3>
+        <p><b>Prose instructions the agent performs as steps</b> — there is no background runner, nothing in <code>settings.json</code> fires them.</p>
+        <ul class="clean">
+          <li><b>before-work</b> — re-read inputs, confirm <code>app-profile.yml</code> fields are filled, check every named input file exists; halt and ask if one is missing.</li>
+          <li><b>after-work</b> — append a row to <code>trace-log.md</code> and overwrite <code>handoff.md</code>, in a single write. Fires once per top-level agent (Doc Sync collects its four author rows first).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Command &amp; external systems</h3>
+        <p><code>/run-pipeline [EPMCDMETST-&lt;n&gt;]</code> — the one entry point; launches the <code>conductor</code>. Blank arg → browse the backlog.</p>
+        <ul class="clean">
+          <li><b>Atlassian MCP</b> — Jira (read) + Confluence (write). Used by Intake &amp; Publish.</li>
+          <li><b>GitHub MCP</b> — branches, commits, PRs, comments. Used by Build, Verify &amp; Release.</li>
+          <li>The MCP servers hold their own credentials — agent logic never handles tokens.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- EASY TO MISS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">06 · Easy to miss</span>
+      <h2>Details worth pinning down</h2>
+    </div>
+    <div class="miss">
+      <div class="m"><h3>Sub-agents aren't launchable Agent types</h3><p>The four authors are <b>path-referenced</b> files Doc Sync reads and follows — they don't appear to the Agent tool. Only the eight files in <code>.claude/agents/</code> launch directly.</p></div>
+      <div class="m"><h3>The first commit is the whole doc bundle</h3><p>Authors leave all four files <b>uncommitted</b>. The Build agent cuts the branch and makes the docs the very first commit, bundled with the code — never a PR at that point.</p></div>
+      <div class="m"><h3>Only three stages are skippable</h3><p>Architecture, Design Review and Implementation Planning can be skipped <b>with explicit consent, logged</b>. Intake, Requirements, Build and Verify cannot.</p></div>
+      <div class="m"><h3>trace-log appends, handoff overwrites</h3><p><code>trace-log.md</code> is the growing audit trail; <code>handoff.md</code> is replaced each stage so it always shows "where we are now" — paste it into a fresh session to resume after a crash.</p></div>
+      <div class="m"><h3>app-profile.yml must be filled first</h3><p>The conductor checks the essentials (<code>app.name</code>, <code>tech</code>, <code>data_model.entities</code>, <code>local_run.start</code>, <code>github.repo</code>) before Intake runs, and asks rather than guessing.</p></div>
+      <div class="m"><h3>MCP servers are a hard dependency</h3><p>Intake/Publish need the Atlassian MCP; Build/Verify/Release need the GitHub MCP. If a server isn't registered, that stage stops and asks — it never fabricates a result.</p></div>
+    </div>
+
+    <div class="warnbox" style="margin-top:16px">
+      <b>Current repo state:</b> the Atlassian and GitHub MCP servers are not yet registered (<code>claude mcp list</code> → none). A live <code>/run-pipeline</code> will reach Doc Sync (all local work) but stall at the first external call until they're wired.
+    </div>
+  </section>
+
+  <div class="footer">
+    Generated from the live pipeline definition in <code>.claude/</code> — agents, sub-agents, skills, <code>rules/guardrails.md</code>, <code>hooks/lifecycle-hooks.md</code>, and <code>config/app-profile.yml</code>. Reflects the repository as read on 2026-10-01.
+  </div>
+
+</div>
+
+</body>
+</html>
