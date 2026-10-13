@@ -1,1 +1,15 @@
-{}
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__atlassian__getJiraIssue|mcp__atlassian__searchJiraIssuesUsingJql|mcp__atlassian__search|mcp__atlassian__getConfluencePage|mcp__jira-epam__jira_get_issue|mcp__jira-epam__jira_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/trim-atlassian-output.js\""
+          }
+        ]
+      }
+    ]
+  }
+}
